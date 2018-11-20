@@ -86,6 +86,7 @@ user.authenticate(** options)
 - returns USER instance 
 
 ```bash
+user_id = "1232"
 user = client.get_user(user_id: user_id,full_dehydrate: true)
 ```
 
@@ -120,7 +121,7 @@ client.get_transactions(user_id)
 - returns Nodes instance 
 - array of Node instance
 
-```
+```bash
 client.get_all_nodes(** options)
 ```
 
@@ -128,21 +129,24 @@ client.get_all_nodes(** options)
 - scope must be an array or else method will raise an error
 - returns subscription instace 
 
-```
-client.create_subscriptions(scope: ["TRAN|PATCH"], url: url )
+```bash
+scope = ["TRAN|PATCH"]
+url = "webhooks.com"
+client.create_subscriptions(scope: scope, url: url )
 ```
 
 ## Get all platforms subscription
 - Developer has option to 
 
-```
+```bash
 client.get_all_subscriptions(** options)
 ```
 
 ## Geta subscription by id
 - returns a subscription instance 
 
-```
+```bash
+subscription_id = "2342324"
 client.get_subscription(subscriptions_id)
 ```
 
@@ -151,14 +155,17 @@ client.get_subscription(subscriptions_id)
 - updates a subscription scope or url 
 - returns a subscription instance 
 
-```
+```bash
+subscription_id = "2342324"
+scope = ["TRAN|PATCH"]
 client.update_subscriptions(subscription_id: subscription_id , scope: scope)
 ```
 
 ## Issue Public Key
 - returns api response 
 
-```
+```bash
+scope = ["USERS|GET"]
 client.issue_public_key(scope: scope)
 ```
 
@@ -166,7 +173,9 @@ client.issue_public_key(scope: scope)
 
 - initiates a dummy transaction to a node
 
-```
+```bash
+user_id = "1234"
+node = "4321"
 client.dummy_transactions(user_id: user_id,node_id: node_id)
 ```
 
