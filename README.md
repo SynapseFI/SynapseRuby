@@ -81,12 +81,12 @@ user.authenticate(** options)
 ## Get USER
 - returns USER instance 
 
-user = client.get_user(user_id: user,full_dehydrate: true)
+user = client.get_user(user_id: user_id,full_dehydrate: true)
 
 ## Get all USERS 
 -  returns USERS instance 
 -  Array of users on a platform 
-client.get_users()
+client.get_users(** options)
 
 ## Gets all transactions on a platform
 
@@ -113,7 +113,7 @@ client.get_all_nodes(** options)
 - scope must be an array or else method will raise an error
 - returns subscription instace 
 
-client.create_subscriptions(scope:, url: )
+client.create_subscriptions(scope: ["TRAN|PATCH"], url: url )
 
 ## Get all platforms subscription
 - Developer has option to 
@@ -130,18 +130,18 @@ client.get_subscription(subscriptions_id)
 - updates a subscription scope or url 
 - returns a subscription instance 
 
-client.update_subscriptions(subscription_id: , scope:)
+client.update_subscriptions(subscription_id: subscription_id , scope: scope)
 
 ## Issue Public Key
 - returns api response 
 
-client.issue_public_key(scope:)
+client.issue_public_key(scope: scope)
 
 ## Dummy Transactions 
 
 - initiates a dummy transaction to a node
 
-client.dummy_transactions(user_id:,node_id:)
+client.dummy_transactions(user_id: user_id,node_id: node_id)
 
 
 
