@@ -2,6 +2,9 @@ require_relative './http_request'
 require 'mime-types'
 require 'base64'
 require 'open-uri'
+require 'json'
+require_relative './node'
+require_relative './nodes'
 
 module SynapsePayRest
 
@@ -12,7 +15,7 @@ module SynapsePayRest
     	VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate].freeze
 
     	attr_reader :client
-		attr_accessor :user_id,:refresh_token, :base_documents, :oauth_key, :expires_in, :flag, :ips
+		attr_accessor :user_id,:refresh_token, :base_documents, :oauth_key, :expires_in, :flag, :ips, :payload, :document_id
 
 		def initialize(user_id:,refresh_token:, client:,payload:, full_dehydrate:)
 			@user_id = user_id
@@ -22,20 +25,59 @@ module SynapsePayRest
 			@payload =payload
 			@full_dehydrate =full_dehydrate
 		end
-		# grab refresh token 
-		# user is created with a refresh token but the refresh token is changed after 10 uses 
-		# you have to get the refesh token again 
 
-		
-		#def update_base_doc(user_id:, payload:,**options)
-			#self.authenticate
-			#path =  get_user_path(user_id: self.user_id, options: options)
-			
-			# payload[physical_docs] base 64 
-			# 
-			
+		# make sure address is correcrt else method will raise an error 
+		def add_base_doc(documents:)
+			path = get_user_path(user_id:self.user_id)
+			client.patch(path,documents)
+			nil
+		end
 
-		#end
+		# adding to base doc after base doc is created 
+		# developer passes full payload 
+		def update_base_doc(documents)
+			# grabs users payload in order to update documents
+			payload = self.payload.to_json
+			payload = JSON.parse(payload) 
+			document_id  = payload["documents"][0]["id"]
+			self.document_id = document_id 
+
+			# update document payload with document id 
+			documents[:documents][0]["id"] = self.document_id
+			path = get_user_path(user_id: self.user_id)
+			client.patch(path, documents)
+			nil 
+		end
+
+		def delete_base_doc
+			# grabs users payload in order to update documents
+			payload = self.payload.to_json
+			payload = JSON.parse(payload) 
+			document_id  = payload["documents"][0]["id"]
+			self.document_id = document_id 
+			documents = {
+				"documents":[{
+					"id": self.document_id,
+					"permission_scope":"DELETE_DOCUMENT"
+				}]
+			}
+			path = get_user_path(user_id: self.user_id)
+			client.patch(path, documents)
+			nil 
+		end
+
+		def get_all_nodes(**options)
+			[options[:page], options[:per_page]].each do |arg|
+				if arg && (!arg.is_a?(Integer) || arg < 1)
+					raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
+				end
+			end
+			path = nodes_path(options: options)
+			nodes = client.get(path)
+			return [] if nodes["nodes"].empty?
+			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no")}
+			nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response, http_client: client)
+		end
 
 		def refresh_token(**options)
 			path = get_user_path(user_id: self.user_id, options: options)
@@ -62,6 +104,12 @@ module SynapsePayRest
 			JSON.pretty_generate(user)
 		end
 
+		def delete_user
+			path = get_user_path(user_id: self.user_id)
+			documents = { "permission": "MAKE-IT-GO-AWAY" }
+			client.patch(path, documents)
+		end
+
 
 
 
@@ -82,6 +130,16 @@ module SynapsePayRest
 			end.compact
 			path += '?' + params.join('&') if params.any?
 			path 
+		end
+
+		def nodes_path(**options)
+			path = "/nodes"
+			params = VALID_QUERY_PARAMS.map do |p|
+				options[p] ? "#{p}=#{options[p]}" : nil
+			end.compact
+
+			path += '?' + params.join('&') if params.any?
+			path
 		end
 
 	end

@@ -402,3 +402,31 @@ module SynapsePayRest
 end
 
 
+args = {
+	client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
+	client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
+	fingerprint:      "static_pin",
+	ip_address:       '127.0.0.1',
+	development_mode: true
+}
+
+args = args
+
+
+puts "========Client Object Created==========" 
+
+client  = SynapsePayRest::Client.new(args) 
+puts client 
+
+puts "========Gets a User=========="
+
+user = "5bd9e16314c7fa00a3076960"
+user = client.get_user(user_id: user,full_dehydrate: true)
+
+docs = {
+  "documents":[{
+    "email":"test2@synapsefi.com"
+  }]
+}
+
+puts user.get_all_nodes()

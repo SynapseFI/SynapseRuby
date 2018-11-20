@@ -32,7 +32,7 @@ args = {
     "test@synapsefi.com"
   ],
   "legal_names": [
-    "Test User"
+    "Andrew Martin"
   ],
   "extra": {
     "supp_id": "122eddfgbeafrfvbbb",
@@ -44,7 +44,45 @@ args = {
 
 
 user = client.create_user(payload: args) 
+puts user.user_id
 pp user 
+
+puts "========Add User Docs=========="
+args = {
+  "documents":[{
+        "email":"test@test.com",
+        "phone_number":"901.111.1111",
+        "ip":"::1",
+        "name":"Andrew Martin",
+        "alias":"Test",
+        "entity_type":"M",
+        "entity_scope":"Arts & Entertainment",
+        "day":2,
+        "month":5,
+        "year":1989,
+        "address_street":"1 Market St.",
+        "address_city":"San Francisco",
+        "address_subdivision":"CA",
+        "address_postal_code":"94114",
+        "address_country_code":"US",
+        "virtual_docs":[{
+            "document_value":"2222",
+            "document_type":"SSN"
+        }],
+        "physical_docs":[{
+            "document_value": "data:image/gif;base64,SUQs==",
+            "document_type": "GOVT_ID"
+        }],
+        "social_docs":[{
+            "document_value":"https://www.facebook.com/valid",
+            "document_type":"FACEBOOK"
+        }]
+    }]}
+
+ user = user.add_base_doc(payload: args)
+ pp user 
+
+raise 
 
 
 puts "========Gets a User=========="
