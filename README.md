@@ -25,8 +25,6 @@ $ gem install synapse_pay_rest
 ```
 ## Documentation
 
-- [Samples demonstrating common operations](samples.md)
-- [synapse_pay_rest gem docs](http://www.rubydoc.info/github/synapsepay/SynapsePayRest-Ruby)
 - [API docs](http://docs.synapsefi.com/v3.1)
 
 ## Initializing Client
