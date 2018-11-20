@@ -1,4 +1,4 @@
-# SynapsePayRest-Ruby
+# SynapseFI--Ruby-Wrapper
 
 Native API library for SynapsePay REST v3.x
 
@@ -143,4 +143,4 @@ client.dummy_transactions(user_id: user_id,node_id: node_id)
 
 
 
-# SynapseFI--Ruby-Wrapper
+
