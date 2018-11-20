@@ -420,13 +420,9 @@ puts client
 
 puts "========Gets a User=========="
 
-user = "5bd9e16314c7fa00a3076960"
+user = "5bf456a5baabfc00a31d78b5"
 user = client.get_user(user_id: user,full_dehydrate: true)
 
-docs = {
-  "documents":[{
-    "email":"test2@synapsefi.com"
-  }]
-}
 
-puts user.get_all_nodes()
+
+puts user.delete_user

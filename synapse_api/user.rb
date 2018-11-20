@@ -95,6 +95,8 @@ module SynapsePayRest
 			oauth_expires = oauth_response['expires_in']
 			self.oauth_key = oauth_key
 			self.expires_in = oauth_expires
+			# self.expire = 0 
+			# seld. authenticate 
 			client.update_headers(oauth_key: oauth_key)
 			self 
 		end
@@ -108,6 +110,10 @@ module SynapsePayRest
 			path = get_user_path(user_id: self.user_id)
 			documents = { "permission": "MAKE-IT-GO-AWAY" }
 			client.patch(path, documents)
+			nil 
+		end
+
+		def create_node
 		end
 
 
