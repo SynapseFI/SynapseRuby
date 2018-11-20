@@ -139,7 +139,9 @@ client.issue_public_key(scope:)
 
 ## Dummy Transactions 
 
-client.dummy_transactions(user_id: user_id,node_id: node_id)
+- initiates a dummy transaction to a node
+
+client.dummy_transactions(user_id:,node_id:)
 
 
 
