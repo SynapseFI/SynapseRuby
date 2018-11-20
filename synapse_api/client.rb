@@ -59,7 +59,6 @@ module SynapsePayRest
     # @param payload [Hash]
     # @see https://docs.synapsepay.com/docs/create-a-user payload structure
     # 
-
     #TODO:
     #Create Error handeling from http request 
     def create_user(payload:)
@@ -346,67 +345,6 @@ module SynapsePayRest
 	def oauth_path(user_id)
 		path = "/oauth/#{user_id}"
 	end
-
-
-  	def payload_for_create(logins:, phone_numbers:, legal_names:, **options)
-        payload = {
-          'logins'        => logins,
-          'phone_numbers' => phone_numbers,
-          'legal_names'   => legal_names,
-        }
-
-        # create with base doc
-        # documents contain virtual_docs in an array 
-        # physical docs contain image in base64
-        payload['documents'] = options[:documents] if options[:documents]
-        payload['physical']  = options[:physical]  if options[:physical]
-        payload['social_docs']  = options[:social_docs]  if options[:social_docs]
-        # optional payload fields
-        extra = {}
-        extra['note']        = options[:note] if options[:note]
-        extra['supp_id']     = options[:supp_id] if options[:supp_id]
-        extra['is_business'] = options[:is_business] if options[:is_business]
-        extra['cip_tag']     = options[:cip_tag] if options[:cip_tag]
-        payload['extra']     = extra if extra.any?
-
-        payload
-  	end
-
-  	# TODO:
-  	def from_response(response, options = "no", oauth: true)
-        user = User.new(
-          user_id:                response['_id'],
-          refresh_token:     response['refresh_token'],
-          client:            client,
-          full_dehydrate:    options,
-          payload:           response
-        )
-
-        #if response.has_key?('flag')
-          #user.flag = response['flag']
-        #end
-
-        #if response.has_key?('ips')
-          #user.ips = response['ips']
-        #end
-
-        # add base doc validation 
-        # add oauth criteria
-
-        # return is a user object 
-        # turning the object to a json 
-
-        # automates authentication upon creating a user  
-        # call the authenticate method is  oauth expires 
-        oauth ? user.authenticate : user
-      end
-
-      # to-do create a user from user data
-      def multiple_from_response(response)
-        return [] if response.empty?
-        response.map { |user_data| from_response(user_data, oauth: false)}
-      end
-
 
     def user_path(user_id: nil, **options)
     	path = "/users"

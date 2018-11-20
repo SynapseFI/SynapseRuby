@@ -88,4 +88,38 @@ module SynapsePayRest
 end
 
 
+#def from_response(response, options = "no", oauth: true)
+       # user = User.new(
+        #  user_id:                response['_id'],
+        #  refresh_token:     response['refresh_token'],
+        #  client:            client,
+        #  full_dehydrate:    options,
+        #  payload:           response
+        #)
+
+        #if response.has_key?('flag')
+          #user.flag = response['flag']
+        #end
+
+        #if response.has_key?('ips')
+          #user.ips = response['ips']
+        #end
+
+        # add base doc validation 
+        # add oauth criteria
+
+        # return is a user object 
+        # turning the object to a json 
+
+        # automates authentication upon creating a user  
+        # call the authenticate method is  oauth expires 
+        #oauth ? user.authenticate : user
+      #end
+
+      # to-do create a user from user data
+      #def multiple_from_response(response)
+      #return [] if response.empty?
+      #response.map { |user_data| from_response(user_data, oauth: false)}
+      #end
+
 
