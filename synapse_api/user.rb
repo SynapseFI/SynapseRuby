@@ -5,6 +5,8 @@ require 'open-uri'
 require 'json'
 require_relative './node'
 require_relative './nodes'
+require_relative './transaction'
+require_relative './transactions'
 
 module SynapsePayRest
 
@@ -15,7 +17,7 @@ module SynapsePayRest
     	VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate].freeze
 
     	attr_reader :client
-		attr_accessor :user_id,:refresh_token, :base_documents, :oauth_key, :expires_in, :flag, :ips, :payload, :document_id
+		attr_accessor :user_id,:refresh_token, :base_documents, :oauth_key, :expires_in, :flag, :ips, :payload, :document_id, :full_dehydrate
 
 		def initialize(user_id:,refresh_token:, client:,payload:, full_dehydrate:)
 			@user_id = user_id
@@ -36,36 +38,12 @@ module SynapsePayRest
 		# adding to base doc after base doc is created 
 		# developer passes full payload 
 		def update_base_doc(documents)
-			# grabs users payload in order to update documents
-			payload = self.payload.to_json
-			payload = JSON.parse(payload) 
-			document_id  = payload["documents"][0]["id"]
-			self.document_id = document_id 
-
-			# update document payload with document id 
-			documents[:documents][0]["id"] = self.document_id
 			path = get_user_path(user_id: self.user_id)
 			client.patch(path, documents)
 			nil 
 		end
 
-		def delete_base_doc
-			# grabs users payload in order to update documents
-			payload = self.payload.to_json
-			payload = JSON.parse(payload) 
-			document_id  = payload["documents"][0]["id"]
-			self.document_id = document_id 
-			documents = {
-				"documents":[{
-					"id": self.document_id,
-					"permission_scope":"DELETE_DOCUMENT"
-				}]
-			}
-			path = get_user_path(user_id: self.user_id)
-			client.patch(path, documents)
-			nil 
-		end
-
+		
 		def get_all_nodes(**options)
 			[options[:page], options[:per_page]].each do |arg|
 				if arg && (!arg.is_a?(Integer) || arg < 1)
@@ -113,10 +91,45 @@ module SynapsePayRest
 			nil 
 		end
 
-		def create_node
+		  # Queries the API for all transactions belonging to a user and returns
+	      # them as Transactions instances.
+	      # 
+	      # @param user_id 
+	      # @param options[:page] [String,Integer] (optional) response will default to 1
+	      # @param options[:per_page} [String,Integer] (optional) response will default to 20
+	    def get_transactions(**options)
+
+			[options[:page], options[:per_page]].each do |arg|
+				if arg && (!arg.is_a?(Integer) || arg < 1)
+					raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
+				end
+			end
+
+	      	refresh_token = refresh_token(user_id: self.user_id)
+	      	oauth_path = oauth_path(self.user_id)
+	      	authenticate(refresh_token,oauth_path)
+	      	path = transactions_path(user_id: self.user_id, options: options)
+	      	trans = client.get(path)
+	      	response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], http_client: client, payload: trans_data)}
+	      	trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response, http_client: client)
+	      	trans
+	    end
+
+
+		def create_node(payload:)
+			path = get_user_path(user_id: self.user_id)
+			path = path + nodes_path
+			response = client.post(path,payload)
+			
+			node = Node.new(
+				user_id: self.user_id,
+				node_id: response["nodes"][0]["_id"],
+				full_dehydrate: "no",
+				http_client: client, 
+				payload: response
+				)
+			node
 		end
-
-
 
 
 		private

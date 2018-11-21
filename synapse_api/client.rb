@@ -62,7 +62,7 @@ module SynapsePayRest
     #TODO:
     #Create Error handeling from http request 
     def create_user(payload:)
-    	#raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+    	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
         #if [logins, phone_numbers, legal_names].any? { |arg| !arg.is_a? Array}
          # raise ArgumentError, 'logins/phone_numbers/legal_names must be Array'
         #end
@@ -106,6 +106,7 @@ module SynapsePayRest
 		options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
 		options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
 
+
 		path = user_path(user_id: user_id, options: options)
 		response = client.get(path)
 
@@ -113,7 +114,7 @@ module SynapsePayRest
           user_id:                response['_id'],
           refresh_token:     response['refresh_token'],
           client:            client,
-          full_dehydrate:    options,
+          full_dehydrate:    options[:full_dehydrate],
           payload:           response
         )
 
@@ -184,32 +185,6 @@ module SynapsePayRest
 		trans 
 		
 	end
-
-
-	  # Queries the API for all transactions belonging to a user and returns
-      # them as Transactions instances.
-      # 
-      # @param user_id 
-      # @param options[:page] [String,Integer] (optional) response will default to 1
-      # @param options[:per_page} [String,Integer] (optional) response will default to 20
-	def get_transactions(user_id = nil, **options)
-
-		[options[:page], options[:per_page]].each do |arg|
-          if arg && (!arg.is_a?(Integer) || arg < 1)
-            raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
-          end
-        end
-
-		refresh_token = refresh_token(user_id: user_id)
-		oauth_path = oauth_path(user_id)
-		authenticate(refresh_token,oauth_path)
-		path = transactions_path(user_id: user_id, options: options)
-		trans = client.get(path)
-		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], http_client: client, payload: trans_data)}
-		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response, http_client: client)
-		trans
-	end
-
 
 	  # Queries the API for all nodes belonging to the platform 
       # 
@@ -305,6 +280,7 @@ module SynapsePayRest
 	# 
 	# "OAUTH|POST,USERS|POST,USERS|GET,USER|GET,USER|PATCH,SUBSCRIPTIONS|GET,SUBSCRIPTIONS|POST,SUBSCRIPTION|GET,SUBSCRIPTION|PATCH,CLIENT|REPORTS,CLIENT|CONTROLS"
 	def issue_public_key(scope:)
+		raise ArgumentError, 'scope must be a string' unless scope.is_a?(String)
 		path = '/client?issue_public_key=YES'
 		path += "&scope=#{scope}"
 		response = client.get(path)
@@ -420,9 +396,18 @@ puts client
 
 puts "========Gets a User=========="
 
-user = "5bf456a5baabfc00a31d78b5"
+user = "5bea4453321f48299bac84e8"
 user = client.get_user(user_id: user,full_dehydrate: true)
 
+args = {
+  "type": "DEPOSIT-US",
+  "info":{
+      "nickname":"My Checking"
+  }
+}
+
+puts user.create_node(payload: args)
 
 
-puts user.delete_user
+
+
