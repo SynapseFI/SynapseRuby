@@ -1,4 +1,4 @@
-# SynapseFI--Ruby-Wrapper
+# SynapseFI-Ruby-v2
 
 Native API library for SynapsePay REST v3.x
 
