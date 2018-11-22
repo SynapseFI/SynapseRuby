@@ -1,6 +1,7 @@
 require 'rest-client'
 require 'open-uri'
 require 'json'
+require_relative './error'
 
 module SynapsePayRest
 	# Wrapper for HTTP requests using RestClient.
@@ -20,9 +21,10 @@ module SynapsePayRest
     	# @param logging [Boolean] (optional) logs to stdout when true
     	# @param log_to [String] (optional) file path to log to file (logging must be true)
 		def initialize(base_url:, client_id:, client_secret:, fingerprint:, ip_address:, **options)
-			
-			log_to = options[:log_to] || 'stdout'
+
+			log_to         = options[:log_to] || 'stdout'
 			RestClient.log = log_to if options[:logging]
+			@logging       = options[:logging]
 
 			@config = {
 				client_id: client_id,

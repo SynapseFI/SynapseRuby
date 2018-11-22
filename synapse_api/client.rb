@@ -8,6 +8,10 @@ require_relative './node'
 require_relative './nodes'
 require_relative './subscription'
 require_relative './subscriptions'
+require 'pp'
+
+
+
 module SynapsePayRest
 	# Initializes various wrapper settings such as development mode and request
  	# header values. Also stores and initializes endpoint class instances 
@@ -106,18 +110,17 @@ module SynapsePayRest
 		options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
 		options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
 
-
-		path = user_path(user_id: user_id, options: options)
+		path = user_path(user_id: user_id, full_dehydrate: options[:full_dehydrate])
 		response = client.get(path)
 
 		user = User.new(
           user_id:                response['_id'],
           refresh_token:     response['refresh_token'],
           client:            client,
-          full_dehydrate:    options[:full_dehydrate],
+          full_dehydrate:    options[:full_dehydrate] == "yes" ? true : false,
           payload:           response
         )
-
+		
         user.authenticate
 	end
 
@@ -274,7 +277,7 @@ module SynapsePayRest
 		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], http_client: client, payload: response)
 	end
 	
-	#Issues public key for client.
+	# Issues public key for client.
 	# @param client [SynapsePayRest::Client]
 	# @param scope [String]
 	# 
@@ -284,21 +287,9 @@ module SynapsePayRest
 		path = '/client?issue_public_key=YES'
 		path += "&scope=#{scope}"
 		response = client.get(path)
-		response
+		response[ "public_key_obj"]
 	end
-
-	# Initiated dummy transactions to a node
-	# @param user_id [String]
-	# @param node_id [String]
-	def dummy_transactions(user_id:,node_id:)
-		refresh_token = refresh_token(user_id: user_id)
-		oauth_path = oauth_path(user_id)
-		authenticate(refresh_token,oauth_path)
-    	path = user_path(user_id: user_id) + "/nodes/#{node_id}/dummy-tran" 
-    	client.get(path)
-    end
-
-   
+ 
 
   	private
 
@@ -323,6 +314,7 @@ module SynapsePayRest
 	end
 
     def user_path(user_id: nil, **options)
+    	
     	path = "/users"
     	path += "/#{user_id}" if user_id
 
@@ -386,7 +378,6 @@ args = {
 	development_mode: true
 }
 
-args = args
 
 
 puts "========Client Object Created==========" 
@@ -396,17 +387,13 @@ puts client
 
 puts "========Gets a User=========="
 
-user = "5bea4453321f48299bac84e8"
-user = client.get_user(user_id: user,full_dehydrate: true)
+user = "5bd9e16314c7fa00a3076960"
+user = client.get_user(user_id: user,full_dehydrate: false)
 
-args = {
-  "type": "DEPOSIT-US",
-  "info":{
-      "nickname":"My Checking"
-  }
-}
 
-puts user.create_node(payload: args)
+node = "5bd9e7b3389f2400adb012ae"
+
+pp node =user.get_node(node_id:"1232")
 
 
 
