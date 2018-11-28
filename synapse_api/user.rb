@@ -14,9 +14,9 @@ module SynapsePayRest
 	class User
 
 		# Valid optional args for #get
-    	VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate, :ship, :force_refresh].freeze
+    VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate, :ship, :force_refresh].freeze
 
-    	attr_reader :client
+    attr_reader :client
 		attr_accessor :user_id,:refresh_token, :oauth_key, :expires_in, :payload, :full_dehydrate
 
 		def initialize(user_id:,refresh_token:, client:,payload:, full_dehydrate:)
@@ -31,10 +31,10 @@ module SynapsePayRest
 		# pass in full payload 
 		# function used to make a base doc go away and update sub-doc
 		# see https://docs.synapsefi.com/docs/updating-existing-document
-		def update_base_doc(documents:)
+		def user_update(payload:)
 			path = get_user_path(user_id: self.user_id)
      begin
-       response = client.patch(path, documents)
+       response = client.patch(path, payload)
      rescue SynapsePayRest::Error::Unauthorized
        self.authenticate()
        response =client.patch(path, documents)
@@ -43,10 +43,10 @@ module SynapsePayRest
 		end
 
 	    # Queries Synapse API for all nodes belonging to user (with optional
-        # filters) and returns them as node instances.
-        # @param page [String,Integer] (optional) response will default to 1
-        # @param per_page [String,Integer] (optional) response will default to 20
-        # @param type [String] (optional)
+      # filters) and returns them as node instances.
+      # @param page [String,Integer] (optional) response will default to 1
+      # @param per_page [String,Integer] (optional) response will default to 20
+      # @param type [String] (optional)
 	    # @see https://docs.synapsepay.com/docs/node-resources node types
 	    # @return [Array<SynapsePayRest::Nodes>] 
 		def get_all_nodes(**options)
@@ -70,14 +70,14 @@ module SynapsePayRest
 
 
 		# Queries Synapse get user API for users refresh_token
-        # @param full_dehydrate [Boolean] 
+      # @param full_dehydrate [Boolean] 
 	    # @see https://docs.synapsefi.com/docs/get-user
 	    # @return refresh_token string
 		def refresh_token(**options)
 			options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
 			options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
 
-			path = get_user_path(user_id: self.user_id, options: options)
+			path = get_user_path(user_id: self.user_id, full_dehydrate: options[:full_dehydrate])
 			response = client.get(path)
 			refresh_token = response["refresh_token"]
 			refresh_token 
@@ -104,22 +104,6 @@ module SynapsePayRest
 		def info
 			user = {:id => self.user_id, :full_dehydrate => self.full_dehydrate, :payload => self.payload}
 			JSON.pretty_generate(user)
-		end
-
-		# Quaries Synapse get user for user 
-		# un-index a user, changing permission scope 
-		def delete_user
-			path = get_user_path(user_id: self.user_id)
-			permission = { "permission": "MAKE-IT-GO-AWAY" }
-
-      begin
-       response = client.patch(path, permission)
-      rescue SynapsePayRest::Error::Unauthorized
-        self.authenticate()
-       response = client.patch(path, permission)
-      end
-
-			response
 		end
 
 	  # Queries the Synapse API get all user transactions belonging to a user and returns
@@ -445,14 +429,28 @@ module SynapsePayRest
       node
     end
 
+    def create_ubo(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path + "/ubo"
+  
+      begin
+       response = client.patch(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.patch(path,payload)
+      end
+
+      response
+    end
+
 		def get_node(node_id:, **options)
       options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
       options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
       options[:force_refresh] = "yes" if options[:force_refresh] == true
       options[:force_refresh] = "no" if options[:force_refresh] == false
 
-			path = nodes_path(options)
-			path = get_user_path(user_id: self.user_id) + path + "/#{node_id}"
+			path = node(node_id:node_id, full_dehydrate: options[:full_dehydrate],force_refresh: options[:force_refresh] )
+      
 			node = client.get(path)
 
       begin
@@ -486,9 +484,6 @@ module SynapsePayRest
        client.get(path)
       end
 		end
-
-
-
 		private
 
 		def oauth_path(**options)
@@ -527,42 +522,17 @@ module SynapsePayRest
 			path += '?' + params.join('&') if params.any?
 			path
 		end
+
+    def node(node_id:, **options)
+      path = "/users/#{self.user_id}/nodes/#{node_id}"
+      params = VALID_QUERY_PARAMS.map do |p|
+        options[p] ? "#{p}=#{options[p]}" : nil
+      end.compact
+
+      path += '?' + params.join('&') if params.any?
+
+      path
+    end
 	end
 end
-
-# was used for when you get multiple users
-#def from_response(response, options = "no", oauth: true)
-       # user = User.new(
-        #  user_id:                response['_id'],
-        #  refresh_token:     response['refresh_token'],
-        #  client:            client,
-        #  full_dehydrate:    options,
-        #  payload:           response
-        #)
-
-        #if response.has_key?('flag')
-          #user.flag = response['flag']
-        #end
-
-        #if response.has_key?('ips')
-          #user.ips = response['ips']
-        #end
-
-        # add base doc validation 
-        # add oauth criteria
-
-        # return is a user object 
-        # turning the object to a json 
-
-        # automates authentication upon creating a user  
-        # call the authenticate method is  oauth expires 
-        #oauth ? user.authenticate : user
-      #end
-
-      # to-do create a user from user data
-      #def multiple_from_response(response)
-      #return [] if response.empty?
-      #response.map { |user_data| from_response(user_data, oauth: false)}
-      #end
-
 

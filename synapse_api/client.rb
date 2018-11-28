@@ -315,7 +315,7 @@ module SynapsePayRest
 	end
 
     def user_path(user_id: nil, **options)
-    	
+
     	path = "/users"
     	path += "/#{user_id}" if user_id
 
@@ -392,13 +392,16 @@ user = "5bd9e16314c7fa00a3076960"
 user = client.get_user(user_id: user,full_dehydrate: true)
 
 
-puts "========Ship Card-US Node ==========" 
+puts "========Get Node =========="
 card_us = "5bfed4e8bab475008ea4e390"
+
+node = user.get_node(node_id: card_us, full_dehydrate: true, force_refresh: true)
+pp node 
+
+puts "========Ship Card-US Node ==========" 
 payload = {
   "fee_node_id":"5bef0dbdb95dfb00bfdc2473",
   "expedite":true
 }
-
-pp user.ship_card(node_id:card_us ,payload:payload)
-
-
+ship = node.ship_card(payload:payload)
+puts ship
