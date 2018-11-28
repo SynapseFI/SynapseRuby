@@ -3,3 +3,6 @@ source 'https://rubygems.org'
 
 
 gem 'synapse_pay_rest'
+gem 'minitest'
+gem 'minitest-reporters'
+gem 'faker'

@@ -65,6 +65,7 @@ module SynapsePayRest
     # 
     #TODO:
     #Create Error handeling from http request 
+   
     def create_user(payload:)
     	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
         #if [logins, phone_numbers, legal_names].any? { |arg| !arg.is_a? Array}
@@ -121,24 +122,24 @@ module SynapsePayRest
           payload:           response
         )
 		
-        user.authenticate
+    user.authenticate
 	end
 
 	# change users scope after creating a user
 	# scope changes during oauth 
 	# scope must be in array  
-    def change_user_scope(user_id:, **scope)
-    	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
-		raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
-		if [scope[:scope]].any? { |arg| !arg.is_a? Array}
-          raise ArgumentError, 'scope must be Array'
-        end
-
-    	refresh_token = refresh_token(user_id: user_id)
-    	oauth_path = oauth_path(user_id)
-    	authenticate(refresh_token, oauth_path, scope)
-    	nil 
+  def change_user_scope(user_id:, **scope)
+  	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+	  raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
+	  if [scope[:scope]].any? { |arg| !arg.is_a? Array}
+        raise ArgumentError, 'scope must be Array'
     end
+
+  	refresh_token = refresh_token(user_id: user_id)
+  	oauth_path = oauth_path(user_id)
+  	authenticate(refresh_token, oauth_path, scope)
+  	nil 
+  end
 
 	# returns an Users instance of all users 
 	# payload for users object contains an array of Users instances
@@ -149,14 +150,14 @@ module SynapsePayRest
     # @note users created this way are not automatically OAuthed
 	def get_users(page: nil, per_page: nil, query: nil)
 		raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
-        [page, per_page].each do |arg|
-          if arg && (!arg.is_a?(Integer) || arg < 1)
-            raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
-          end
-        end
-        if query && !query.is_a?(String)
-          raise ArgumentError, 'query must be a String'
-        end
+    [page, per_page].each do |arg|
+      if arg && (!arg.is_a?(Integer) || arg < 1)
+        raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
+      end
+    end
+    if query && !query.is_a?(String)
+      raise ArgumentError, 'query must be a String'
+    end
 
 		path = user_path(page: page, per_page: per_page, query: query)
 		response = client.get(path)
@@ -164,7 +165,7 @@ module SynapsePayRest
 		users = response["users"].map { |user_data| User.new(user_id: user_data['_id'], refresh_token: user_data['refresh_token'], client: client, full_dehydrate: "no", payload: user_data)}
 		users = Users.new(limit: response["limit"], page: response["page"], page_count: response["page_count"], user_count: response["user_count"], payload: users, http_client: client)
 		
-        users
+    users
 	end
 
 	  # Queries the API for all transactions belonging to the client platform
@@ -197,10 +198,10 @@ module SynapsePayRest
       # @returns Nodes instances 
 	def get_all_nodes(**options)
 		[options[:page], options[:per_page]].each do |arg|
-          if arg && (!arg.is_a?(Integer) || arg < 1)
-            raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
-          end
-        end
+      if arg && (!arg.is_a?(Integer) || arg < 1)
+        raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
+      end
+    end
 		path = nodes_path(options: options)
 		nodes = client.get(path)
 		return [] if nodes["nodes"].empty?
@@ -209,7 +210,7 @@ module SynapsePayRest
 	end
 
 	def get_all_institutions(**options)
-		client.get(institutions_path(options: option))
+		client.get(institutions_path(options))
 	end
 	  # Creates a new subscription in the API and returns a Subscription instance from the
       # response data.
@@ -236,7 +237,7 @@ module SynapsePayRest
       # 
       # @return [Array<SynapsePayRest::Subscriptions>]
 	def get_all_subscriptions(**options)
-		subscriptions = client.get(subscriptions_path)
+		subscriptions = client.get(subscriptions_path(options))
 		
 		return [] if subscriptions["subscriptions"].empty?
 		response = subscriptions["subscriptions"].map { |subscription_data| Subscription.new(subscription_id: subscription_data["_id"], url: subscription_data["url"], http_client: client, payload: subscription_data)}
@@ -249,10 +250,10 @@ module SynapsePayRest
       # @return [SynapsePayRest::Subscription]
 	def get_subscription(subscription_id)
 		raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
-        raise ArgumentError, 'subscription_id must be a String' unless subscription_id.is_a?(String)
+    raise ArgumentError, 'subscription_id must be a String' unless subscription_id.is_a?(String)
 		path = subscriptions_path + "/#{subscription_id}"
 		response = client.get(path)
-		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], http_client: client, payload: response)
+		subscription = Subscription.new(subscription_id: response["_id"], url: response["url"], http_client: client, payload: response)
 	end
 
 	
@@ -291,7 +292,7 @@ module SynapsePayRest
 	end
  
 
-  	private
+  private
 
   	# grabs the refresh token and formats a refresh token payload 
 	def refresh_token(user_id:)
@@ -368,33 +369,6 @@ module SynapsePayRest
 
   end
 end
-
-
-args = {
-	client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
-	client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
-	fingerprint:      "static_pin",
-	ip_address:       '127.0.0.1',
-	development_mode: true
-}
-
-
-
-puts "========Client Object Created==========" 
-
-client  = SynapsePayRest::Client.new(args) 
-puts client 
-
-puts "========Gets a User=========="
-
-user = "5bd9e16314c7fa00a3076960"
-user = client.get_user(user_id: user,full_dehydrate: false)
-
-
-node = "5bd9e7b3389f2400adb012ae"
-
-pp node =user.get_node(node_id:"1232")
-
 
 
 

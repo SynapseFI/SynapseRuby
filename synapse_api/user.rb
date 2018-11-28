@@ -3,6 +3,7 @@ require 'mime-types'
 require 'base64'
 require 'open-uri'
 require 'json'
+require_relative './error'
 require_relative './node'
 require_relative './nodes'
 require_relative './transaction'
@@ -32,7 +33,12 @@ module SynapsePayRest
 		# see https://docs.synapsefi.com/docs/updating-existing-document
 		def update_base_doc(documents)
 			path = get_user_path(user_id: self.user_id)
-			client.patch(path, documents)
+     begin
+       client.patch(path, documents)
+     rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       client.patch(path, documents)
+     end
 			nil 
 		end
 
@@ -50,7 +56,13 @@ module SynapsePayRest
 				end
 			end
 			path = nodes_path(options: options)
-			nodes = client.get(path)
+      begin
+       nodes = client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       nodes = client.get(path)
+      end
+
 			return [] if nodes["nodes"].empty?
 			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no")}
 			nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response, http_client: client)
@@ -98,41 +110,62 @@ module SynapsePayRest
 		# un-index a user, changing permission scope 
 		def delete_user
 			path = get_user_path(user_id: self.user_id)
-			documents = { "permission": "MAKE-IT-GO-AWAY" }
-			client.patch(path, documents)
+			permission = { "permission": "MAKE-IT-GO-AWAY" }
+
+      begin
+       client.patch(path, permission)
+      rescue SynapsePayRest::Error::Unauthorized
+        self.authenticate()
+       client.patch(path, permission)
+      end
+
 			nil 
 		end
 
-		  # Queries the Synapse get all user transactions belonging to a user and returns
-	      # them as Transactions instances [Array<SynapsePayRest::Transactions>] 
-	      # @param options[:page] [String,Integer] (optional) response will default to 1
-	      # @param options[:per_page} [String,Integer] (optional) response will default to 20
-	    def get_transactions(**options)
+	  # Queries the Synapse API get all user transactions belonging to a user and returns
+      # them as Transactions instances [Array<SynapsePayRest::Transactions>] 
+      # @param options[:page] [String,Integer] (optional) response will default to 1
+      # @param options[:per_page} [String,Integer] (optional) response will default to 20
+    def get_transactions(**options)
+  		[options[:page], options[:per_page]].each do |arg|
+  			if arg && (!arg.is_a?(Integer) || arg < 1)
+  				raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
+  			end
+  		end
 
-			[options[:page], options[:per_page]].each do |arg|
-				if arg && (!arg.is_a?(Integer) || arg < 1)
-					raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
-				end
-			end
+      path = transactions_path(user_id: self.user_id, options: options)
 
-	      	self.authenticate()
-	      	path = transactions_path(user_id: self.user_id, options: options)
-	      	trans = client.get(path)
-	      	response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], http_client: client, payload: trans_data)}
-	      	trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response, http_client: client)
-	      	trans
-	    end
+      begin
+        trans = client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+        self.authenticate()
+        trans = client.get(path)
+      end
 
-	      # Creates a new node in the API associated to the provided user and
-	      # returns a node instance from the response data
-	      # @param nickname [String]
-	      # @param type [String]
-	      # @see https://docs.synapsefi.com/docs/deposit-accounts for example
-	      # @return [SynapsePayRest::Node]
+      
+      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], http_client: client, payload: trans_data)}
+      trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response, http_client: client)
+
+    	trans
+    end
+
+      # Creates a new node in the API associated to the provided user and
+      # returns a node instance from the response data
+      # @param nickname [String]
+      # @param type [String]
+      # @see https://docs.synapsefi.com/docs/deposit-accounts for example
+      # @return [SynapsePayRest::Node]
 		def create_node(payload:)
 			path = get_user_path(user_id: self.user_id)
 			path = path + nodes_path
-			response = client.post(path,payload)
+	
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
 			
 			node = Node.new(
 				user_id: self.user_id,
@@ -144,11 +177,19 @@ module SynapsePayRest
 			node
 		end
 
-		def get_node(node_id:)
+		def get_node(node_id:, **options)
 			path = nodes_path()
 			path = get_user_path(user_id: self.user_id) + path + "/#{node_id}"
 			puts path 
 			node = client.get(path)
+
+      begin
+       node = client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       node = client.get(path)
+      end
+
 	
 			node = Node.new(node_id: node['_id'], 
 				user_id: node['user_id'], 
@@ -165,7 +206,13 @@ module SynapsePayRest
 		def dummy_transactions(node_id:)
 			self.authenticate()
 			path = get_user_path(user_id: self.user_id) + "/nodes/#{node_id}/dummy-tran" 
-			client.get(path)
+
+      begin
+       client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       client.get(path)
+      end
 		end
 
 
