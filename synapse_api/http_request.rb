@@ -84,7 +84,7 @@ module SynapsePayRest
 
 	    	response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
 	    	puts 'RESPONSE:', JSON.parse(response) if @logging
-	    	JSON.parse(response)
+	    	response = JSON.parse(response) 
       	end
 
       	# Sends a GET request to the given path with the given payload.

@@ -33,12 +33,7 @@ args = {
   ],
   "legal_names": [
     "Andrew Martin"
-  ],
-  "extra": {
-    "supp_id": "122eddfgbeafrfvbbb",
-    "cip_tag":1,
-    "is_business": false
-  }
+  ]
 }
 
 

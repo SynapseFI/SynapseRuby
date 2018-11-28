@@ -4,6 +4,9 @@ module SynapsePayRest
     # Raised on a 4xx HTTP status code
     ClientError = Class.new(self)
 
+    # Raised on the HTTP status code 202
+    Accepted = Class.new(ClientError)
+
     # Raised on the HTTP status code 400
     BadRequest = Class.new(ClientError)
 
@@ -51,9 +54,9 @@ module SynapsePayRest
 
     # HTTP status code to Error subclass mapping
     #
-    # @todo need to add an error message for various 202 cases (fingerprint, mfa, etc)
     # @todo doesn't do well when there's an html response from nginx for bad gateway/timeout
     ERRORS = {
+      '202' => SynapsePayRest::Error::Accepted,
       '400' => SynapsePayRest::Error::BadRequest,
       '401' => SynapsePayRest::Error::Unauthorized,
       '402' => SynapsePayRest::Error::RequestDeclined,
@@ -73,7 +76,7 @@ module SynapsePayRest
     # The SynapsePay API Error Code
     #
     # @return [Integer]
-    attr_reader :code
+    attr_reader :code, :http_code
 
     # The JSON HTTP response in Hash form
     #
@@ -85,12 +88,13 @@ module SynapsePayRest
       #
       # @param body [String]
       # @param code [Integer]
+      # @param http_code [Integer]
       # @return [SynapsePayRest::Error]
       def from_response(body)
         message, error_code, http_code = parse_error(body)
         http_code = http_code.to_s
         klass = ERRORS[http_code] || SynapsePayRest::Error
-        klass.new(message: message, code: error_code, response: body)
+        klass.new(message: message, code: error_code, response: body, http_code: http_code)
       end
 
       private
@@ -112,10 +116,11 @@ module SynapsePayRest
     # @param code [Integer]
     # @param response [Hash]
     # @return [SynapsePayRest::Error]
-    def initialize(message: '', code: nil, response: {})
+    def initialize(message: '', code: nil, response: {}, http_code:)
       super(message)
       @code     = code
       @response = response
+      @http_code = http_code
     end
   end
 end
