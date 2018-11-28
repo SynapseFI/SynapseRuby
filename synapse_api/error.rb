@@ -120,6 +120,7 @@ module SynapsePayRest
       super(message)
       @code     = code
       @response = response
+      @message = message
       @http_code = http_code
     end
   end

@@ -184,8 +184,8 @@ module SynapsePayRest
 		trans = client.get(path)
 		
 		return [] if trans["trans"].empty?
-		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], http_client: client, payload: trans_data)}
-		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response, http_client: client)
+		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
+		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
 		trans 
 		
 	end
@@ -370,5 +370,35 @@ module SynapsePayRest
   end
 end
 
+args = {
+  client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
+  client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
+  fingerprint:      "static_pin",
+  ip_address:       '127.0.0.1',
+  development_mode: true
+}
+
+args = args
+
+
+puts "========Client Object Created==========" 
+
+client  = SynapsePayRest::Client.new(args) 
+
+puts "========Gets a User=========="
+
+
+user = "5bd9e16314c7fa00a3076960"
+user = client.get_user(user_id: user,full_dehydrate: true)
+
+
+puts "========Ship Card-US Node ==========" 
+card_us = "5bfed4e8bab475008ea4e390"
+payload = {
+  "fee_node_id":"5bef0dbdb95dfb00bfdc2473",
+  "expedite":true
+}
+
+pp user.ship_card(node_id:card_us ,payload:payload)
 
 

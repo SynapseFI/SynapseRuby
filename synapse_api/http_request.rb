@@ -87,11 +87,10 @@ module SynapsePayRest
 	    	response = JSON.parse(response) 
       	end
 
-      	# Sends a GET request to the given path with the given payload.
+    # Sends a GET request to the given path with the given payload.
 		# @param path [String]
 		# @return [Hash] API response
 		
-		# todo : add error 
 		# @raise [SynapsePayRest::Error] subclass depends on HTTP response
 		def get(path)
 			response = with_error_handling {RestClient.get(full_url(path), headers)} 
@@ -99,6 +98,11 @@ module SynapsePayRest
 			JSON.parse(response)
 		end
 
+    def delete(path)
+      response = with_error_handling {RestClient.delete(full_url(path), headers)} 
+      puts 'RESPONSE:', JSON.parse(response) if @logging
+      JSON.parse(response)
+    end
 
 		# Sends a PATCH request to the given path with the given payload.
 	    # 
