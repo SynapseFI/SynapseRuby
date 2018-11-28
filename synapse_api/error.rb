@@ -55,6 +55,19 @@ module SynapsePayRest
     # HTTP status code to Error subclass mapping
     #
     # @todo doesn't do well when there's an html response from nginx for bad gateway/timeout
+    ActionPending
+    IncorrectClientCredentials
+    IncorrectUserCredentials
+    UnauthorizedFingerprint
+    PayloadError
+    UnauthorizedAction
+    IncorrectValues
+    ObjectNotFound
+    ActionNotAllowed
+    IdempotencyConflict
+    RequestFailed
+    ServerError
+  
     ERRORS = {
       '202' => SynapsePayRest::Error::Accepted,
       '400' => SynapsePayRest::Error::BadRequest,
