@@ -15,6 +15,34 @@ module SynapsePayRest
 			@user_id = user_id 
 			@payload = payload
 		end
+
+    def ship_card(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path + "/#{node_id}?ship=YES"
+  
+      begin
+       response = client.patch(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.patch(path,payload)
+      end
+      response
+    end
+
+    def reset_debit_card(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path + "/#{self.node_id}?reset=YES"
+  
+      begin
+       response = client.patch(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.patch(path,payload)
+      end
+      response
+    end
+
+
 	end
 end
 
