@@ -127,6 +127,8 @@ module SynapsePayRest
 		  "#{base_url}#{path}"
 		end
 
+    # raising an exception based on http_request
+    # yeilds if http_request raises an exception
 		def with_error_handling
 			yield
 		rescue RestClient::Exceptions::Timeout

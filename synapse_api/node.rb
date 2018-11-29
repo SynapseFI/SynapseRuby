@@ -42,6 +42,20 @@ module SynapsePayRest
       response
     end
 
+    def get_transaction(trans_id:)
+      path = nodes_path(user_id: self.user_id) + "/trans/#{trans_id}" 
+     
+      begin
+        trans = http_client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+        self.authenticate()
+        trans = http_client.get(path)
+      end 
+      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
+      transaction
+    end
+
+
     private
     def nodes_path(user_id:,**options)
       path = "/users/#{user_id}/nodes/#{node_id}"
