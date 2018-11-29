@@ -55,19 +55,7 @@ module SynapsePayRest
     # HTTP status code to Error subclass mapping
     #
     # @todo doesn't do well when there's an html response from nginx for bad gateway/timeout
-    ActionPending
-    IncorrectClientCredentials
-    IncorrectUserCredentials
-    UnauthorizedFingerprint
-    PayloadError
-    UnauthorizedAction
-    IncorrectValues
-    ObjectNotFound
-    ActionNotAllowed
-    IdempotencyConflict
-    RequestFailed
-    ServerError
-  
+    
     ERRORS = {
       '202' => SynapsePayRest::Error::Accepted,
       '400' => SynapsePayRest::Error::BadRequest,
@@ -94,7 +82,7 @@ module SynapsePayRest
     # The JSON HTTP response in Hash form
     #
     # @return [Hash]
-    attr_reader :response
+    attr_reader :response, :message
 
     class << self
       # Create a new error from an HTTP response
@@ -124,7 +112,6 @@ module SynapsePayRest
     end
 
     # Initializes a new Error object
-    #
     # @param message [Exception, String]
     # @param code [Integer]
     # @param response [Hash]
