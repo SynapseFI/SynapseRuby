@@ -121,7 +121,41 @@ module SynapsePayRest
 			JSON.parse(response)
 		end
 
+    def oauthenticate(user_id:)
+      refresh_token = refresh_token(user_id: user_id)
+    end
+
 		private
+    # get user
+    # get refresh_token
+    # send refresh_token to oauth path 
+
+
+    # grabs the refresh token and formats a refresh token payload 
+    def refresh_token(user_id:)
+      path = "/users/#{user_id}"
+      response = get(path)
+      refresh_token = response["refresh_token"]
+    
+      refresh_token = {"refresh_token" => refresh_token} 
+      oauth_path = oauth_path(user_id)
+      authenticate(refresh_token, oauth_path)
+    end
+
+    # options payload to change scope of oauth 
+    def authenticate(refresh_token, oauth_path)
+      oauth_key = post(oauth_path, refresh_token)
+      oauth_key = oauth_key['oauth_key']
+      update_headers(oauth_key: oauth_key)
+      nil
+    end
+
+    def oauth_path(user_id)
+      path = "/oauth/#{user_id}"
+    end
+
+
+
 
 		def full_url(path)
 		  "#{base_url}#{path}"

@@ -107,9 +107,9 @@ module SynapsePayRest
 		end
 
 	  # Queries the Synapse API get all user transactions belonging to a user and returns
-      # them as Transactions instances [Array<SynapsePayRest::Transactions>] 
-      # @param options[:page] [String,Integer] (optional) response will default to 1
-      # @param options[:per_page} [String,Integer] (optional) response will default to 20
+    # them as Transactions instances [Array<SynapsePayRest::Transactions>] 
+    # @param options[:page] [String,Integer] (optional) response will default to 1
+    # @param options[:per_page} [String,Integer] (optional) response will default to 20
     def get_transactions(**options)
   		[options[:page], options[:per_page]].each do |arg|
   			if arg && (!arg.is_a?(Integer) || arg < 1)
@@ -470,20 +470,6 @@ module SynapsePayRest
 			node
 		end
 
-		  # Initiates dummy transactions to a node
-		  # @param user_id [String]
-		  # @param node_id [String]
-		def dummy_transactions(node_id:)
-			self.authenticate()
-			path = get_user_path(user_id: self.user_id) + "/nodes/#{node_id}/dummy-tran" 
-
-      begin
-       client.get(path)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       client.get(path)
-      end
-		end
 		private
 
 		def oauth_path(**options)

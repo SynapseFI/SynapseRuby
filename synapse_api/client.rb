@@ -8,6 +8,7 @@ require_relative './node'
 require_relative './nodes'
 require_relative './subscription'
 require_relative './subscriptions'
+require_relative './subnet'
 require 'pp'
 
 
@@ -106,7 +107,7 @@ module SynapsePayRest
   	# change users scope after creating a user
   	# scope changes during oauth 
   	# scope must be in array  
-    def change_user_scope(user_id:, **scope)
+    def oauth(user_id:, **scope)
     	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
   	  raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
   	  if [scope[:scope]].any? { |arg| !arg.is_a? Array}
@@ -251,7 +252,7 @@ module SynapsePayRest
 
     private
 
-    	# grabs the refresh token and formats a refresh token payload 
+    # grabs the refresh token and formats a refresh token payload 
   	def refresh_token(user_id:)
   		response = get_user(user_id:user_id)
   		refresh_token = response.refresh_token
@@ -349,13 +350,15 @@ user = client.get_user(user_id: user,full_dehydrate: true)
 
 
 puts "========Get Node =========="
-card_us = "5bd9e7b3389f2400adb012ae"
+node_id = "5bd9f755389f2400b9b0a25f"
 
-node = user.get_node(node_id: card_us, full_dehydrate: true, force_refresh: true)
+node = user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
 puts node
 
+puts "========Create Subnet==========" 
 
-puts "========Get Transaction ==========" 
-trans_id = "5bd9ee3874dcec00d4a8864f"
+payload = {
+  "nickname":"Test AC/RT"
+}
 
-puts node.get_transaction(trans_id: trans_id)
+pp node.create_subnet(payload: payload)
