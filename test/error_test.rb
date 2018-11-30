@@ -255,7 +255,7 @@ class ErrorTest < Minitest::Test
   def test_502_response
     response = {
       'error' => {
-        'en' => "Bad Gateway error."
+        'en' => "Bad Gateway error"
       },
       'error_code' => '502',
       'http_code' => '502',
