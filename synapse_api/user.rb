@@ -70,9 +70,9 @@ module SynapsePayRest
 
 
 		# Queries Synapse get user API for users refresh_token
-      # @param full_dehydrate [Boolean] 
-	    # @see https://docs.synapsefi.com/docs/get-user
-	    # @return refresh_token string
+    # @param full_dehydrate [Boolean] 
+    # @see https://docs.synapsefi.com/docs/get-user
+    # @return refresh_token string
 		def refresh_token(**options)
 			options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
 			options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
@@ -85,9 +85,14 @@ module SynapsePayRest
 
 		# Quaries Synapse get oauth API for user after extracting users refresh token
 		# @params scope [Array<Strings>]
-		# Function does not suppor registering new fingerprint
+    # @see https://docs.synapsefi.com/docs/get-oauth_key-refresh-token 
+		# Function does not support registering new fingerprint
 		def authenticate(**options)
-			payload = payload_for_refresh(refresh_token: self.refresh_token())
+      payload = {
+        "refresh_token" => self.refresh_token()
+      }
+      payload["scope"] = options[:scope] if options[:scope] 
+      
 			path = oauth_path(options: options)
 			oauth_response = client.post(path, payload)
 			oauth_key = oauth_response['oauth_key']
@@ -474,10 +479,6 @@ module SynapsePayRest
 
 		def oauth_path(**options)
 			path = "/oauth/#{self.user_id}"
-		end
-
-		def payload_for_refresh(refresh_token:)
-			{'refresh_token' => refresh_token}
 		end
 
 		def get_user_path(user_id:, **options)

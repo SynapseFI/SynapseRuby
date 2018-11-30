@@ -143,6 +143,95 @@ scope =["TRAN|PATCH"]
 
 scope = client.change_user_scope(user_id: user, scope: scope )
 
+puts "=========Get Transaction========="
+
+node_id = "5bd9e7b3389f2400adb012ae"
+trans_id = "5bd9ee3874dcec00d4a8864f"
+
+trans = user.get_transaction(node_id: node_id,trans_id: trans_id)
+
+puts trans 
+
+puts "=========Delete Transaction========="
+
+node_id = "5bd9e7b3389f2400adb012ae"
+trans_id = "5bfec645bab8f200d4e85fbd"
+
+#delete = user.cancel_transaction(node_id: node_id,trans_id: trans_id)
+
+#puts delete
+
+puts "=========Comment on Delete Transaction========="
+
+node_id = "5bd9e7b3389f2400adb012ae"
+trans_id = "5bfec645bab8f200d4e85fbd"
+payload = {
+  "comment": "I deleted this transaction"
+}
+
+transaction = user.comment_transaction(node_id: node_id,trans_id: trans_id, payload: payload)
+
+pp transaction 
+
+puts "========Get Node ==========" 
+node_id = "5bd9e7b3389f2400adb012ae"
+
+pp user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
+
+puts "========Create Card-US Node ==========" 
+payload = {
+  "type": "CARD-US",
+  "info": {
+    "nickname":"My Debit Card",
+    "document_id":"6edbf71154676e17febe0d5d01d25c5a1349c1c482ed25eb23612e4b82e8ca9f"
+  }
+}
+
+pp user.create_card_us_node(payload: payload)
+
+puts "========Ship Card-US Node ==========" 
+payload = {
+  "fee_node_id":"5bef0dbdb95dfb00bfdc2473",
+  "expedite":true
+}
+ship = node.ship_card(payload:payload)
+puts ship
+
+puts "========Get Transaction ==========" 
+trans_id = "5bd9ee3874dcec00d4a8864f"
+
+puts node.get_transaction(trans_id: trans_id)
+
+puts "========Create Transaction ==========" 
+
+payload = {
+  "to": {
+    "type": "SYNAPSE-US",
+    "id": "55b3f8c686c2732b4c4e9df6"
+  },
+  "amount": {
+    "amount": 20.1,
+    "currency": "USD"
+  },
+  "extra": {
+    "ip": "192.168.0.1"
+  }
+}
+
+puts node.create_transaction(payload: payload)
+
+puts "========Create Subnet==========" 
+
+payload = {
+  "nickname":"Test AC/RT"
+}
+
+pp node.create_subnet(payload: payload)
+
+
+
+
+
 
 
 

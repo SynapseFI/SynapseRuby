@@ -1,45 +1,50 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
+require '../synapse_api/client'
+require '../synapse_api/http_request'
 
 class HTTPClientTest < Minitest::Test
   def setup
-    @client = test_client
-    @http_client = @client.http_client
+    @options = {
+      client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
+      client_secret:    'client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
+      ip_address:       '127.0.0.1',
+      fingerprint:      'static_pin',
+      development_mode: true,
+      base_url: 'https://uat-api.synapsefi.com/v3.1'
+    }
   end
 
   def test_base_url
-    assert_respond_to @http_client, :base_url
+    @http_request = SynapsePayRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
+
+    #@http_request = @client.client
+
+    assert_respond_to @http_request, :base_url
   end
 
   def test_config_exists_and_returns_a_hash
-    assert_instance_of Hash, @http_client.config
-  end
-
-  def test_get_headers
-    headers = @http_client.get_headers
-    config  = @http_client.config
-    # client_id|client_secret
-    assert_equal headers['X-SP-GATEWAY'], "#{config[:client_id]}|#{config[:client_secret]}"
-    # oauth_key|fingerprint
-    assert_equal headers['X-SP-USER'], "#{config[:oauth_key]}|#{config[:fingerprint]}"
-    assert_equal headers['X-SP-USER-IP'], config[:ip_address]
+    @http_request = @client = SynapsePayRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
+    
+    assert_instance_of Hash, @http_request.config
   end
 
   def test_update_headers
     new_options = {
       fingerprint:   'new fingerprint',
-      client_id:     'new client_id',
-      client_secret: 'new client_secret',
-      ip_address:    'new ip',
-      oauth_key:     'new oauth_key'
+      idemopotency_key:     'new idemopotency_key'
     }
-    @http_client.update_headers(new_options)
-    config = @http_client.config
+
+    @client = SynapsePayRest::Client.new(@options)
+
+    @http_request = @client.client
+
+    @client.update_headers(fingerprint: new_options[:fingerprint], idemopotency_key: new_options[:idemopotency_key])
+    config = @http_request.config
 
     assert_equal config[:fingerprint], new_options[:fingerprint]
-    assert_equal config[:client_id], new_options[:client_id]
-    assert_equal config[:client_secret], new_options[:client_secret]
-    assert_equal config[:ip_address], new_options[:ip_address]
-    assert_equal config[:oauth_key], new_options[:oauth_key]
+    assert_equal config[:idemopotency_key], new_options[:idemopotency_key]
   end
+
+  
 end
