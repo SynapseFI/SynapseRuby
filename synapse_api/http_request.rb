@@ -47,7 +47,8 @@ module SynapsePayRest
 				accept: :json,
 				'X-SP-GATEWAY' => gateway,
 			    'X-SP-USER'    => user,
-			    'X-SP-USER-IP' => config[:ip_address]
+			    'X-SP-USER-IP' => config[:ip_address],
+          'X-SP-IDEMPOTENCY-KEY' => config[:idemopotency_key] 
 			}
 		end
 
@@ -55,12 +56,14 @@ module SynapsePayRest
 		alias_method :get_headers, :headers 
 
 		# update headers and return nothing
-		def update_headers(oauth_key: nil, fingerprint: nil, client_id: nil, client_secret: nil, ip_address: nil, **options)
+		def update_headers(oauth_key: nil, fingerprint: nil, client_id: nil, client_secret: nil, ip_address: nil, idemopotency_key: nil)
 			config[:fingerprint]   = fingerprint if fingerprint
 			config[:oauth_key]     = oauth_key if oauth_key
 			config[:client_id]     = client_id if client_id
 			config[:client_secret] = client_secret if client_secret
 			config[:ip_address]    = ip_address if ip_address
+      config[:idemopotency_key] = idemopotency_key if idemopotency_key
+
 			nil
 		end
 

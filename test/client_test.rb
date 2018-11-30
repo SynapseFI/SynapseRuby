@@ -29,7 +29,7 @@ class ClientTest < Minitest::Test
   def test_endpoint_changes_when_development_mode_false
     @options[:development_mode] = false
     client = SynapsePayRest::Client.new(@options)
-    assert_equal client.client.base_url, 'https://api.synapsefi.com/v3.1'
+    assert_equal client.client.base_url, 'https://uat-api.synapsefi.com/v3.1'
   end
 
   # Test is client.client is and instance of HTTPClient

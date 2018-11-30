@@ -48,7 +48,8 @@ module SynapsePayRest
                  else
                    'https://api.synapsefi.com/v3.1'
                  end
-
+        @client_id = client_id
+        @client_secret = client_secret
         @http_client  = HTTPClient.new(base_url: base_url,
                                      client_id: client_id,
                                      client_secret: client_secret,
@@ -77,6 +78,11 @@ module SynapsePayRest
       user.authenticate
 	  end
 
+    # options payload to change scope of oauth 
+    def update_headers(fingerprint:nil, idemopotency_key:nil, ip_address:nil)
+      client.update_headers(fingerprint: fingerprint, idemopotency_key: idemopotency_key, ip_address: ip_address)
+    end
+
   	# Queries the API for a user by id and returns a User instances if found
   	# options for query parameters such as :full_dehydrate
   	# @param id [String] id of the user to find
@@ -103,22 +109,6 @@ module SynapsePayRest
   		
       user.authenticate
   	end
-
-  	# change users scope after creating a user
-  	# scope changes during oauth 
-  	# scope must be in array  
-    def oauth(user_id:, **scope)
-    	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
-  	  raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
-  	  if [scope[:scope]].any? { |arg| !arg.is_a? Array}
-          raise ArgumentError, 'scope must be Array'
-      end
-
-    	refresh_token = refresh_token(user_id: user_id)
-    	oauth_path = oauth_path(user_id)
-    	authenticate(refresh_token, oauth_path, scope)
-    	nil 
-    end
 
   	# returns an Users instance of all users 
   	# payload for users object contains an array of Users instances
@@ -252,26 +242,6 @@ module SynapsePayRest
 
     private
 
-    # grabs the refresh token and formats a refresh token payload 
-  	def refresh_token(user_id:)
-  		response = get_user(user_id:user_id)
-  		refresh_token = response.refresh_token
-  	
-  		refresh_token = {"refresh_token" => refresh_token} 
-  	end
-
-  	# options payload to change scope of oauth 
-  	def authenticate(refresh_token, oauth_path, **options)
-  		oauth_key = client.post(oauth_path, refresh_token, options)
-  		oauth_key = oauth_key['oauth_key']
-  		client.update_headers(oauth_key: oauth_key)
-  		nil
-  	end
-
-  	def oauth_path(user_id)
-  		path = "/oauth/#{user_id}"
-  	end
-
     def user_path(user_id: nil, **options)
 
     	path = "/users"
@@ -327,38 +297,48 @@ module SynapsePayRest
   end
 end
 
-args = {
-  client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
-  client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
-  fingerprint:      "static_pin",
-  ip_address:       '127.0.0.1',
-  development_mode: true
-}
-
-args = args
 
 
-puts "========Client Object Created==========" 
-
-client  = SynapsePayRest::Client.new(args) 
-
-puts "========Gets a User=========="
 
 
-user = "5bd9e16314c7fa00a3076960"
-user = client.get_user(user_id: user,full_dehydrate: true)
 
 
-puts "========Get Node =========="
-node_id = "5bd9f755389f2400b9b0a25f"
 
-node = user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
-puts node
 
-puts "========Create Subnet==========" 
 
-payload = {
-  "nickname":"Test AC/RT"
-}
 
-pp node.create_subnet(payload: payload)
+# grabs the refresh token and formats a refresh token payload 
+    #def refresh_token(user_id:)
+      #response = get_user(user_id:user_id)
+      #refresh_token = response.refresh_token
+    
+      #refresh_token = {"refresh_token" => refresh_token} 
+    #end
+
+    # options payload to change scope of oauth 
+    #def authenticate(refresh_token, oauth_path, **options)
+      #oauth_key = client.post(oauth_path, refresh_token, options)
+      #oauth_key = oauth_key['oauth_key']
+      #client.update_headers(oauth_key: oauth_key)
+      #nil
+    #end
+
+    #def oauth_path(user_id)
+      #path = "/oauth/#{user_id}"
+    #end
+
+    # change users scope after creating a user
+    # scope changes during oauth 
+    # scope must be in array  
+    #def oauth(user_id:, **scope)
+      #raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+      #raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
+      #if [scope[:scope]].any? { |arg| !arg.is_a? Array}
+          #raise ArgumentError, 'scope must be Array'
+      #end
+
+      #refresh_token = refresh_token(user_id: user_id)
+      #oauth_path = oauth_path(user_id)
+      #authenticate(refresh_token, oauth_path, scope)
+      #nil 
+    #end

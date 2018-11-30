@@ -112,6 +112,7 @@ class ErrorTest < Minitest::Test
     assert_equal "110", details["error_code"] 
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_402_response
     response = {
       'error' => {
@@ -210,6 +211,7 @@ class ErrorTest < Minitest::Test
     assert_equal "400", details["error_code"] 
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object 
   def test_429_response
     response = {
       'error' => {
@@ -229,6 +231,7 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_500_response
     response = {
       'error' => {
@@ -248,6 +251,7 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_502_response
     response = {
       'error' => {
@@ -267,6 +271,7 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_503_response
     response = {
       'error' => {
@@ -286,6 +291,7 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_504_response
     response = {
       'error' => {
