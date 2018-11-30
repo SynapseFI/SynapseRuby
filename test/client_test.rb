@@ -60,6 +60,32 @@ class ClientTest < Minitest::Test
     assert_instance_of SynapsePayRest::User, @response 
   end
 
+  def test_get_users
+    client = SynapsePayRest::Client.new(@options)
+    response = client.get_users
+    assert_instance_of SynapsePayRest::Users, response 
+  end
+
+  def test_get_transaction
+    client = SynapsePayRest::Client.new(@options)
+    response = client.get_transaction()
+    assert_instance_of SynapsePayRest::Transactions, response 
+  end
+
+  def test_get_all_nodes
+    client = SynapsePayRest::Client.new(@options)
+    response = client.get_all_nodes(page: 20, per_page: 50)
+    assert_instance_of SynapsePayRest::Nodes, response 
+  end
+  
+  # added sleep() methods for all subscription test method to not trigger SynapsePayRest::Error::TooManyRequests
+  def test_create_subscriptions
+    client = SynapsePayRest::Client.new(@options)
+    response = client.create_subscriptions(scope: ["TRAN|PATCH"], url: "https://webhook.site/155f30bc-0c1a-42b9-b075-12c18fd242c5")
+    assert_instance_of SynapsePayRest::Subscription, response 
+    sleep(5)
+  end
+
   def test_get_all_subscriptions
     client = SynapsePayRest::Client.new(@options)
     response = client.get_all_subscriptions()
