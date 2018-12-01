@@ -228,6 +228,40 @@ payload = {
 
 pp node.create_subnet(payload: payload)
 
+args = {
+  client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
+  client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
+  fingerprint:      "static_pin",
+  ip_address:       '127.0.0.1',
+  development_mode: true
+}
+
+args = args
+
+
+puts "========Client Object Created==========" 
+
+client  = SynapsePayRest::Client.new(args) 
+
+puts "========Gets a User=========="
+
+
+user = "5bd9e16314c7fa00a3076960"
+user = client.get_user(user_id: user,full_dehydrate: true)
+
+puts "========Get Node ==========" 
+node_id = "5bd9e7b3389f2400adb012ae"
+
+node = user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
+
+puts "========Create Subnet==========" 
+
+payload = {
+  "nickname":"Test AC/RT"
+}
+
+pp node.create_subnet(payload: payload)
+
 
 
 
