@@ -306,7 +306,6 @@ end
 
 
 
-
 # grabs the refresh token and formats a refresh token payload 
     #def refresh_token(user_id:)
       #response = get_user(user_id:user_id)

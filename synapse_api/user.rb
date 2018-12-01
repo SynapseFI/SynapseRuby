@@ -64,7 +64,7 @@ module SynapsePayRest
       end
 
 			return [] if nodes["nodes"].empty?
-			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no")}
+			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no", user: self)}
 			nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response, http_client: client)
 		end
 
@@ -138,6 +138,10 @@ module SynapsePayRest
     	trans
     end
 
+    # Queries Synapse API for a transaction belonging to the supplied node by transaction id
+    # and returns a Transaction instance if found.
+    # @param id [String] id of the transaction to find
+    # @return [SynapsePayRest::Transaction]
     def get_transaction(node_id:,trans_id:,**options)
       path = "/users/#{self.user_id}/nodes/#{node_id}/trans/#{trans_id}" 
       begin
@@ -150,35 +154,12 @@ module SynapsePayRest
       transaction
     end
 
-    def cancel_transaction(node_id:,trans_id:,**options)
-      path = "/users/#{self.user_id}/nodes/#{node_id}/trans/#{trans_id}" 
-      begin
-        response = client.delete(path)
-      rescue SynapsePayRest::Error::Unauthorized
-        self.authenticate()
-        response = client.delete(path)
-      end 
-      response
-    end
-
-    def comment_transaction(node_id:,trans_id:, payload:,**options)
-      path = "/users/#{self.user_id}/nodes/#{node_id}/trans/#{trans_id}" 
-      begin
-        trans = client.patch(path, payload)
-      rescue SynapsePayRest::Error::Unauthorized
-        self.authenticate()
-        trans = client.patch(path, payload)
-      end 
-      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
-      transaction
-    end
-
-      # Creates a card-us node in the API associated to the provided user and
-      # returns a node instance from the response data
-      # @param nickname [String]
-      # @param type [String]
-      # @see https://docs.synapsefi.com/docs/deposit-accounts for example
-      # @return [SynapsePayRest::Node]
+    # Creates a card-us node in the API associated to the provided user and
+    # returns a node instance from the response data
+    # @param nickname [String]
+    # @param type [String]
+    # @see https://docs.synapsefi.com/docs/deposit-accounts for example
+    # @return [SynapsePayRest::Node]
 		def create_card_us_node(payload:)
 			path = get_user_path(user_id: self.user_id)
 			path = path + nodes_path
@@ -196,23 +177,11 @@ module SynapsePayRest
 				node_id: response["nodes"][0]["_id"],
 				full_dehydrate: false,
 				http_client: client, 
-				payload: response
+				payload: response,
+        user: self 
 				)
 			node
 		end
-
-    def ship_card(node_id: ,payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path + "/#{node_id}?ship=YES"
-  
-      begin
-       response = client.patch(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.patch(path,payload)
-      end
-      response
-    end
 
     def create_deposit_us(payload:)
       path = get_user_path(user_id: self.user_id)
@@ -231,7 +200,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -253,7 +223,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -275,7 +246,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -297,7 +269,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -319,7 +292,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -341,7 +315,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -363,7 +338,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -385,7 +361,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -407,7 +384,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -429,7 +407,8 @@ module SynapsePayRest
         node_id: response["nodes"][0]["_id"],
         full_dehydrate: false,
         http_client: client, 
-        payload: response
+        payload: response,
+        user: self
         )
       node
     end
@@ -448,6 +427,12 @@ module SynapsePayRest
       response
     end
 
+
+    # Queries the API for a node belonging to user(self),
+    # and returns a node instance from the response data.
+    # @param id [String] id of the node to find
+    # @param full_dehydrate [String] (optional) if 'yes', returns all trans data on node
+    # @param force_refresh [String] (optional) if 'yes', force refresh yes will attempt updating the account balance and transactions
 		def get_node(node_id:, **options)
       options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
       options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
@@ -464,13 +449,13 @@ module SynapsePayRest
        self.authenticate()
        node = client.get(path)
       end
-
 	
 			node = Node.new(node_id: node['_id'], 
-				user_id: node['user_id'], 
+				user_id: self.user_id, 
 				http_client: client, 
 				payload: node, 
-				full_dehydrate: options[:full_dehydrate] == "yes" ? true : false
+				full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
+        user: self
 				)
 			node
 		end

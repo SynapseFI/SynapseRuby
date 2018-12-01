@@ -5,15 +5,16 @@ module SynapsePayRest
     # valid query params 
     VALID_QUERY_PARAMS = [:page, :per_page].freeze
 
-		attr_reader :node_id, :user_id, :payload, :full_dehydrate, :http_client
+		attr_reader :node_id, :user_id, :payload, :full_dehydrate, :http_client, :user
 
 		attr_accessor 
 
-		def initialize(node_id:, user_id:,payload:, full_dehydrate:, http_client:)
+		def initialize(node_id:, user_id:,payload:, full_dehydrate:, http_client:, user:nil)
 			@node_id = node_id
 			@full_dehydrate = full_dehydrate
 			@http_client = http_client
 			@user_id = user_id 
+      @user = user 
 			@payload = payload
 		end
 
@@ -24,7 +25,7 @@ module SynapsePayRest
       begin
        response = http_client.patch(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       http_client.oauthenticate(user_id: self.user_id)
+       user.authenticate()
        response = http_client.patch(path,payload)
       end
       response
@@ -36,7 +37,7 @@ module SynapsePayRest
       begin
        response = http_client.patch(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       http_client.oauthenticate(user_id: self.user_id)
+       user.authenticate()
        response = http_client.patch(path,payload)
       end
       response
@@ -48,7 +49,7 @@ module SynapsePayRest
       begin
        transaction = http_client.post(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       http_client.oauthenticate(user_id: self.user_id)
+       user.authenticate()
        transaction = http_client.post(path,payload)
       end
       transaction = Transaction.new(trans_id: transaction['_id'], payload: transaction)
@@ -60,7 +61,7 @@ module SynapsePayRest
       begin
         trans = http_client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-        http_client.oauthenticate(user_id: self.user_id)
+        user.authenticate()
         trans = http_client.get(path)
       end 
       transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
@@ -79,7 +80,7 @@ module SynapsePayRest
       begin
         trans = http_client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-        http_client.oauthenticate(user_id: self.user_id)
+        user.authenticate()
         trans = http_client.get(path)
       end 
 
@@ -91,11 +92,15 @@ module SynapsePayRest
 
     def update_node(payload:)
       path = nodes_path(user_id: self.user_id, node_id: self.node_id) 
+
+      if user == nil
+        user = get_user(user_id: self.user_id)
+      end
      
       begin
         update = http_client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-        http_client.oauthenticate(user_id: self.user_id)
+        user.authenticate()
         update = http_client.get(path)
       end 
       update = Transaction.new(trans_id: update['_id'], payload: update)
@@ -105,10 +110,14 @@ module SynapsePayRest
     def delete_node()
       path = nodes_path(user_id: self.user_id, node_id: self.node_id) 
      
+      if user == nil
+        user = get_user(user_id: self.user_id)
+      end
+
       begin
         delete = http_client.delete(path)
       rescue SynapsePayRest::Error::Unauthorized
-        http_client.oauthenticate(user_id: self.user_id)
+        user.authenticate()
         delete = http_client.delete(path)
       end 
       delete
@@ -125,10 +134,15 @@ module SynapsePayRest
       else
         path = nodes_path(user_id: self.user_id, node_id: self.node_id) + "/dummy-tran" 
       end
+
+      if user == nil
+        user = get_user(user_id: self.user_id)
+      end
+
       begin
        response = http_client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       http_client.oauthenticate(user_id: self.user_id)
+       user.authenticate()
        response = http_client.get(path)
       end
       response
@@ -139,10 +153,14 @@ module SynapsePayRest
     def create_subnet(payload:)
       path = subnet_path(user_id: self.user_id, node_id: self.node_id) 
 
+      if user == nil
+        user = get_user(user_id: self.user_id)
+      end
+
       begin
        subnet = http_client.post(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       http_client.oauthenticate(user_id: self.user_id)
+       user.authenticate()
        subnet = http_client.post(path,payload)
       end
       subnet = Subnet.new(subnet_id: subnet['_id'], payload: subnet)
@@ -164,6 +182,18 @@ module SynapsePayRest
     def subnet_path(user_id:, node_id:)
       path = "/users/#{user_id}/nodes/#{node_id}/subnets"
       path
+    end
+
+    def get_user(user_id:)
+      response = http_client.get("/users/#{user_id}")
+      user = User.new(
+            user_id:                response['_id'],
+            refresh_token:     response['refresh_token'],
+            client:            http_client,
+            full_dehydrate:    false,
+            payload:           response
+          )
+      user
     end
 	end
 end

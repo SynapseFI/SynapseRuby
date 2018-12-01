@@ -48,8 +48,11 @@ module SynapsePayRest
 				'X-SP-GATEWAY' => gateway,
 			    'X-SP-USER'    => user,
 			    'X-SP-USER-IP' => config[:ip_address],
-          'X-SP-IDEMPOTENCY-KEY' => config[:idemopotency_key] 
 			}
+      if config[:idemopotency_key]
+        headers['X-SP-IDEMPOTENCY-KEY'] = config[:idemopotency_key] 
+      end
+      headers
 		end
 
 		# Alias for headers (copy of current headers)

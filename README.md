@@ -27,6 +27,8 @@ $ gem install synapse_pay_rest
 
 - [API docs](http://docs.synapsefi.com/v3.1)
 
+# Client
+
 ## Initializing Client
 
 - Returns Client instance 
@@ -70,16 +72,6 @@ payload = {
 }
 
 user = client.create_user(payload: payload) 
-```
-
-## Authenticate a USER
-
-- Grabs a user refresh_token using get_user
-- Post to Oauth to authenticate user, with optional params such as scope 
-- returns USER instance 
-
-```bash
-user.authenticate(** options)
 ```
 
 ## Get USER
@@ -177,6 +169,71 @@ client.issue_public_key(scope: scope)
 user_id = "1234"
 node = "4321"
 client.dummy_transactions(user_id: user_id,node_id: node_id)
+```
+
+# User 
+
+## Authenticate a USER
+
+- Grabs a user refresh_token using get_user
+- Post to Oauth to authenticate user, with optional params such as scope 
+- returns USER instance 
+
+```bash
+user.authenticate(** options)
+```
+
+## Update Documents 
+
+```bash
+body = {
+  "update":{
+    "login":{
+      "email":"test2@synapsefi.com"
+    },
+    "remove_login":{
+      "email":"test@synapsefi.com"
+    },
+    "phone_number":"901-111-2222",
+    "remove_phone_number":"901.111.1111"
+    }
+}
+
+
+user.user_update(payload:)
+```
+ 
+## Get Node 
+
+```bash
+node_id = "5bd9e7b3389f2400adb012ae"
+
+user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
+```
+
+## Get All Nodes
+
+- options[page, per_page, type]
+```bash
+user.get_all_nodes(**options)
+```
+
+# Transactions
+
+## Comment on status 
+
+```bash
+payload = {
+  "comment": "I deleted this transaction"
+}
+
+transaction = trans.comment_transaction(payload: payload)
+```
+
+## Cancel Transaction
+
+```bash
+trans.cancel_transaction()
 ```
 
 
