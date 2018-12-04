@@ -14,7 +14,7 @@ module SynapsePayRest
 	class User
 
 		# Valid optional args for #get
-    VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate, :ship, :force_refresh].freeze
+    VALID_QUERY_PARAMS = [:query, :page, :per_page, :type, :full_dehydrate, :ship, :force_refresh].freeze
 
     attr_reader :client
 		attr_accessor :user_id,:refresh_token, :oauth_key, :expires_in, :payload, :full_dehydrate
@@ -55,7 +55,8 @@ module SynapsePayRest
 					raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
 				end
 			end
-			path = nodes_path(options: options)
+			path = get_user_path(user_id: self.user_id) + nodes_path(options)
+    
       begin
        nodes = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
@@ -65,9 +66,8 @@ module SynapsePayRest
 
 			return [] if nodes["nodes"].empty?
 			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no", user: self)}
-			nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response, http_client: client)
+      nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], nodes_count: nodes["node_count"], payload: response, http_client: client)
 		end
-
 
 		# Queries Synapse get user API for users refresh_token
     # @param full_dehydrate [Boolean] 
@@ -132,35 +132,37 @@ module SynapsePayRest
       end
 
       
-      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
+      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data, user: self, http_client: client)}
       trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
 
     	trans
     end
 
-    # Queries Synapse API for a transaction belonging to the supplied node by transaction id
-    # and returns a Transaction instance if found.
-    # @param id [String] id of the transaction to find
-    # @return [SynapsePayRest::Transaction]
-    def get_transaction(node_id:,trans_id:,**options)
-      path = "/users/#{self.user_id}/nodes/#{node_id}/trans/#{trans_id}" 
-      begin
-        trans = client.get(path)
-      rescue SynapsePayRest::Error::Unauthorized
-        self.authenticate()
-        trans = client.get(path)
-      end 
-      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
-      transaction
-    end
-
-    # Creates a card-us node in the API associated to the provided user and
+    # Creates Synapse node
     # returns a node instance from the response data
     # @param nickname [String]
     # @param type [String]
     # @see https://docs.synapsefi.com/docs/deposit-accounts for example
+    # Node types:
+      #'ACH-US'                                 
+      #'IOU'                   
+      #'RESERVE-US'           
+      #'DEPOSIT-US'                        
+      #'TRIUMPH-SUBACCOUNT-US' 
+      #'SUBACCOUNT-US'         
+      #'WIRE-INT'               
+      #'WIRE-US'               
+      #'CHECK-US'               
+      #'CLEARING-US'            
+      #'IB-DEPOSIT-US'          
+      #'IB-SUBACCOUNT-US'      
+      #'INTERCHANGE-US'        
+      #'CARD-US'                
+      #'SUBCARD-US'             
+      #'CRYPTO-US'             
+      #'LOAN-US'               
     # @return [SynapsePayRest::Node]
-		def create_card_us_node(payload:)
+		def create_node(payload:)
 			path = get_user_path(user_id: self.user_id)
 			path = path + nodes_path
 	
@@ -171,248 +173,13 @@ module SynapsePayRest
        response = client.post(path,payload)
       end
 
-			
-			node = Node.new(
-				user_id: self.user_id,
-				node_id: response["nodes"][0]["_id"],
-				full_dehydrate: false,
-				http_client: client, 
-				payload: response,
-        user: self 
-				)
-			node
+      nodes = response["nodes"].map { |nodes_data| Node.new(user_id: self.user_id, node_id: nodes_data["_id"], full_dehydrate: false, http_client: client, payload: response ,user: self)}
+      nodes = Nodes.new(page: response["page"], limit: response["limit"], page_count: response["page_count"], nodes_count: response["node_count"], payload: nodes)
+
+			nodes
 		end
 
-    def create_deposit_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_ach_us_logins(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_ach_us_act_rt(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_interchange_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_check_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_check_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_crypto_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_wire_us(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_wire_int(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
-    def create_iou(payload:)
-      path = get_user_path(user_id: self.user_id)
-      path = path + nodes_path
-  
-      begin
-       response = client.post(path,payload)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       response = client.post(path,payload)
-      end
-
-      
-      node = Node.new(
-        user_id: self.user_id,
-        node_id: response["nodes"][0]["_id"],
-        full_dehydrate: false,
-        http_client: client, 
-        payload: response,
-        user: self
-        )
-      node
-    end
-
+    
     def create_ubo(payload:)
       path = get_user_path(user_id: self.user_id)
       path = path + nodes_path + "/ubo"
@@ -460,6 +227,21 @@ module SynapsePayRest
 			node
 		end
 
+    # Gets statement by user.
+    # @param page [SynapsePayRest::Client]
+    # @param per_page [SynapsePayRest::User]  
+    # @see https://docs.synapsefi.com/docs/statements-by-user
+    def get_statements(**options)
+      path = get_user_path(user_id: self.user_id) + "/statements"
+      params = VALID_QUERY_PARAMS.map do |p|
+        options[p] ? "#{p}=#{options[p]}" : nil
+      end.compact
+      path += '?' + params.join('&') if params.any?
+
+      statements = client.get(path)
+      statements
+    end
+
 		private
 
 		def oauth_path(**options)
@@ -485,13 +267,15 @@ module SynapsePayRest
 			path
 		end
 
-		def nodes_path(**options)
+		def nodes_path( **options )
 			path = "/nodes"
+      
 			params = VALID_QUERY_PARAMS.map do |p|
 				options[p] ? "#{p}=#{options[p]}" : nil
 			end.compact
 
 			path += '?' + params.join('&') if params.any?
+  
 			path
 		end
 
@@ -507,4 +291,13 @@ module SynapsePayRest
     end
 	end
 end
+
+
+
+
+
+
+
+
+
 

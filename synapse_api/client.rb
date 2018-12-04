@@ -15,8 +15,7 @@ require 'pp'
 
 module SynapsePayRest
 	# Initializes various wrapper settings such as development mode and request
- 	# header values. Also stores and initializes endpoint class instances 
-  	# (Users, Nodes, Transactions) for making API calls.
+ 	# header values
 
   class Client 
 
@@ -78,7 +77,7 @@ module SynapsePayRest
       user.authenticate
 	  end
 
-    # options payload to change scope of oauth 
+    # Update headers
     def update_headers(fingerprint:nil, idemopotency_key:nil, ip_address:nil)
       client.update_headers(fingerprint: fingerprint, idemopotency_key: idemopotency_key, ip_address: ip_address)
     end
@@ -153,7 +152,7 @@ module SynapsePayRest
   		trans = client.get(path)
   		
   		return [] if trans["trans"].empty?
-  		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
+  		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data, http_client: http_client)}
   		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
   		trans 
   		
@@ -296,8 +295,6 @@ module SynapsePayRest
     end
   end
 end
-
-
 
 
 
