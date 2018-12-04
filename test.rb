@@ -275,3 +275,280 @@ pp node.create_subnet(payload: payload)
 
 
 
+
+
+
+
+
+
+
+
+    def create_deposit_us(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_ach_us_logins(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+     def create_ach_us_mfa(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_ach_us_act_rt(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_interchange_us(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_check_us(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_crypto_us(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_wire_us(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_wire_int(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_iou(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+    def create_loan(payload:)
+      path = get_user_path(user_id: self.user_id)
+      path = path + nodes_path
+  
+      begin
+       response = client.post(path,payload)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       response = client.post(path,payload)
+      end
+
+      
+      node = Node.new(
+        user_id: self.user_id,
+        node_id: response["nodes"][0]["_id"],
+        full_dehydrate: false,
+        http_client: client, 
+        payload: response,
+        user: self
+        )
+      node
+    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
