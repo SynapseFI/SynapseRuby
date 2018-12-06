@@ -3,6 +3,7 @@ require 'minitest/reporters'
 require '../synapse_api/client'
 require '../synapse_api/http_request'
 
+
 class HTTPClientTest < Minitest::Test
   def setup
     @options = {
@@ -45,6 +46,4 @@ class HTTPClientTest < Minitest::Test
     assert_equal config[:fingerprint], new_options[:fingerprint]
     assert_equal config[:idemopotency_key], new_options[:idemopotency_key]
   end
-
-  
 end
