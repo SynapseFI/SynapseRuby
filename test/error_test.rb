@@ -52,7 +52,6 @@ class ErrorTest < Minitest::Test
 
     details = RestClient::Request.execute(:method => :post, :url => "https://uat-api.synapsefi.com/v3.1/oauth/#{user_id}", :payload => refresh_token.to_json, :headers => headers, :timeout => 300)
     details = JSON.parse(details)
-
     error = SynapsePayRest::Error.from_response(details)
     assert_instance_of SynapsePayRest::Error::Accepted, error
     
@@ -252,26 +251,6 @@ class ErrorTest < Minitest::Test
   end
 
   # checks SynapsePayRest::Error to make sure class matches response to the right Error object
-  def test_502_response
-    response = {
-      'error' => {
-        'en' => "Bad Gateway error"
-      },
-      'error_code' => '502',
-      'http_code' => '502',
-      'success' => false
-    }
-
-    error = SynapsePayRest::Error.from_response(response)
-
-    assert_instance_of SynapsePayRest::Error::BadGateway, error
-    assert_kind_of SynapsePayRest::Error::BadGateway, error
-    assert_equal "Bad Gateway error", error.message
-    assert_equal '502', error.code
-    assert_equal response, error.response
-  end
-
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_503_response
     response = {
       'error' => {
@@ -291,25 +270,6 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
-  def test_504_response
-    response = {
-      'error' => {
-        'en' => "Gateway Timeout error"
-      },
-      'error_code' => '504',
-      'http_code' => '504',
-      'success' => false
-    }
-
-    error = SynapsePayRest::Error.from_response(response)
-
-    assert_instance_of SynapsePayRest::Error::GatewayTimeout, error
-    assert_kind_of SynapsePayRest::Error::GatewayTimeout, error
-    assert_equal "Gateway Timeout error", error.message
-    assert_equal '504', error.code
-    assert_equal response, error.response
-  end
 end
 
 

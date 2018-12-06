@@ -36,33 +36,32 @@ class UserTest < Minitest::Test
 
     response = user.user_update(payload: payload)
     
-    assert_includes response["logins"][0]["email"], payload[:update][:login][:email]
+    assert_includes response.payload["logins"][0]["email"], payload[:update][:login][:email]
   end
 
-  def test_get_transactions
+  def test_get_all_user_transaction
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
-    transactions = user.get_transactions()
+    transactions = user.get_user_transactions()
 
     assert_instance_of SynapsePayRest::Transactions, transactions
   end
 
-  def test_get_all_nodes
+  def test_get_all_user_nodes
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
 
-    nodes = user.get_all_nodes(type:"ACH-US")
-    assert_equal 3, nodes.nodes_count 
+    nodes = user.get_all_user_nodes(type:"ACH-US")
     assert_equal nodes.payload[0].payload["type"], "ACH-US"
   end
 
-  def test_get_node
+  def test_get_user_node
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
-    node = user.get_node(node_id: "5bfed4e8bab475008ea4e390", full_dehydrate: true)
+    node = user.get_user_node(node_id: "5bfed4e8bab475008ea4e390", full_dehydrate: true)
     
     assert_equal true, node.full_dehydrate 
   end
@@ -71,9 +70,184 @@ class UserTest < Minitest::Test
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
-    statements = user.get_statements()
+    statements = user.get_user_statement()
 
     assert_equal "200", statements["http_code"]
   end
+
+  def test_create_transaction
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9ebfe389f2400afb03a97"
+    payload = {
+      "to": {
+        "type": "SYNAPSE-US",
+        "id": "55b3f8c686c2732b4c4e9df6"
+      },
+      "amount": {
+        "amount": 20.1,
+        "currency": "USD"
+      },
+      "extra": {
+        "ip": "192.168.0.1"
+      }
+    } 
+    transaction = user.create_transaction(node_id: node_id, payload: payload)
+
+    assert_instance_of SynapsePayRest::Transaction, transaction
+  end
+
+  def test_get_node_transaction
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bfed4e8bab475008ea4e390"
+    trans_id = "5c002ab7c9ab5b00ea5a8abd"
+    
+    transaction = user.get_node_transaction(node_id: node_id, trans_id: trans_id)
+    
+    assert_instance_of SynapsePayRest::Transaction, transaction
+  end
+
+  def test_get_all_node_transaction
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    
+    transactions = user.get_all_node_transaction(node_id: node_id)
+    
+    assert_instance_of SynapsePayRest::Transactions, transactions
+  end
+
+  def test_dummy_transactions
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    transaction = user.dummy_transactions(node_id: node_id, is_credit: true)
+    assert_equal transaction["success"], true
+  end
+
+  def test_create_subnet
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9ebfe389f2400afb03a97"
+    payload = {
+      "nickname":"Test AC/RT"
+    }
+
+    #subnet = user.create_subnet(node_id: node_id, payload: payload)
+    #assert_instance_of SynapsePayRest::Subnet, subnet
+  end
+
+  def test_get_all_subnets
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    subnets = user.get_all_subnets(node_id: node_id)
+    assert_instance_of SynapsePayRest::Subnets, subnets
+  end
+
+  def test_get_subnet
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    subnet_id = "5c002eb460128b001f217787"
+
+    subnets = user.get_subnet(node_id: node_id, subnet_id: subnet_id)
+    assert_instance_of SynapsePayRest::Subnet, subnets
+  end
+
+  def test_get_node_statements
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    
+
+    statements = user.get_node_statements(node_id: node_id)
+    assert_equal "200", statements["http_code"]
+  end
+
+  def test_comment_transaction
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    trans_id = "5c087d9699c81e5b3328e860"
+
+    payload = {
+      "comment": "It Settled!"
+    }
+
+    transaction = user.comment_transaction(node_id: node_id, trans_id: trans_id, payload: payload)
+    assert_instance_of SynapsePayRest::Transaction, transaction
+  end 
+
+  def test_cancel_transaction
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    trans_id = "5c09472fc9ab5b00d44c6a4d"
+
+    #transaction = user.cancel_transaction(node_id: node_id, trans_id: trans_id)
+    #transaction["_id"]
+    #assert_equal trans_id,  transaction["_id"]
+  end 
+
+  def test_update_node
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bd9f755389f2400b9b0a25f"
+    payload = {
+      "nickname": "Savings"
+    }
+
+    node = user.update_node(node_id: node_id, payload: payload)
+
+    assert_equal node_id,  node.node_id
+  end
+
+  def test_ship_card
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bfed4e8bab475008ea4e390"
+    payload = {
+      "fee_node_id":"5bd9e7b3389f2400adb012ae",
+      "expedite":false 
+    }
+
+    ship = user.ship_card(node_id: node_id, payload: payload)
+
+    assert_equal node_id,  ship["_id"]
+  end 
+
+  def test_reset_debit_card
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    node_id = "5bfed4e8bab475008ea4e390"
+    
+
+    reset = user.reset_debit_card(node_id: node_id)
+
+    assert_equal node_id,  reset["_id"]
+  end 
+
+
+
+
+   
+  #def test_create_node
+    #client = SynapsePayRest::Client.new(@options)
+  #end
 
 end
