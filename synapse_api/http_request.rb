@@ -74,24 +74,31 @@ module SynapsePayRest
 		# @param path [String] 
 		# @param payload [HASH]
 		# @param **options payload = idempotency_key [String] (optional) avoid accidentally performing the same operation twice
-	    # @return [JSON] API response
+	  # @return [JSON] API response
 
-	    #todo : add error handling
-	    # @raise [SynapsePayRest::Error] subclass depends on HTTP response
+    def post(path, payload, **options) 
+    	#copy of current headers 
+    	headers = get_headers
 
-	    def post(path, payload, **options) 
-	    	#copy of current headers 
-	    	headers = get_headers
+    	# update the headers with idempotency_key
+    	if options[:idempotency_key]
+    		headers = headers.merge({'X-SP-IDEMPOTENCY-KEY' => options[:idempotency_key]})
+    	end
 
-	    	# update the headers with idempotency_key
-	    	if options[:idempotency_key]
-	    		headers = headers.merge({'X-SP-IDEMPOTENCY-KEY' => options[:idempotency_key]})
-	    	end
+    	response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
+    	puts 'RESPONSE:', JSON.parse(response) if @logging
+    	response = JSON.parse(response) 
 
-	    	response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
-	    	puts 'RESPONSE:', JSON.parse(response) if @logging
-	    	response = JSON.parse(response) 
-      	end
+     
+      # mfa return the response 
+      # 2fa raise
+
+      if response["http_code"] == "202" && response["phone_numbers"]
+        raise Error.from_response(response) 
+      else
+        response
+      end
+    end
 
     # Sends a GET request to the given path with the given payload.
 		# @param path [String]
@@ -101,13 +108,25 @@ module SynapsePayRest
 		def get(path)
 			response = with_error_handling {RestClient.get(full_url(path), headers)} 
 			puts 'RESPONSE:', JSON.parse(response) if @logging
-			JSON.parse(response)
+			response = JSON.parse(response)
+
+       if response["http_code"] == "202" && response["phone_numbers"]
+        raise Error.from_response(response) 
+      else
+        response
+      end
 		end
 
     def delete(path)
       response = with_error_handling {RestClient.delete(full_url(path), headers)} 
       puts 'RESPONSE:', JSON.parse(response) if @logging
-      JSON.parse(response)
+      response = JSON.parse(response)
+
+      if response["http_code"] == "202" && response["phone_numbers"]
+        raise Error.from_response(response) 
+      else
+        response
+      end
     end
 
 		# Sends a PATCH request to the given path with the given payload.
@@ -124,7 +143,13 @@ module SynapsePayRest
 		def patch(path, payload)
 			response = with_error_handling {RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300)} 
 			p 'RESPONSE:', JSON.parse(response) if @logging
-			JSON.parse(response)
+			response = JSON.parse(response)
+
+      if response["http_code"] == "202" && response["phone_numbers"]
+        raise Error.from_response(response) 
+      else
+        response
+      end
 		end
 
     def oauthenticate(user_id:)

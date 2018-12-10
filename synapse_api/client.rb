@@ -9,6 +9,7 @@ require_relative './nodes'
 require_relative './subscription'
 require_relative './subscriptions'
 require_relative './subnet'
+require_relative './subnets'
 require 'pp'
 
 
@@ -21,7 +22,7 @@ module SynapsePayRest
 
   	# to do: take into account params 
 
-  	VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate].freeze
+  	VALID_QUERY_PARAMS = [:query, :page, :per_page, :full_dehydrate, :radius, :zip, :lat, :lon].freeze
 
   	attr_accessor :http_client
 
@@ -152,7 +153,7 @@ module SynapsePayRest
   		trans = client.get(path)
   		
   		return [] if trans["trans"].empty?
-  		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data, http_client: http_client)}
+  		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
   		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
   		trans 
   		
@@ -171,8 +172,8 @@ module SynapsePayRest
   		path = nodes_path(options: options)
   		nodes = client.get(path)
   		return [] if nodes["nodes"].empty?
-  		response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], http_client: client, payload: node_data, full_dehydrate: "no")}
-  		nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response, http_client: client)
+  		response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], payload: node_data, full_dehydrate: "no")}
+  		nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], node_count: nodes["node_count"], payload: response)
   	end
 
     # Queries Synapse API for all institutions available for bank logins 
@@ -198,7 +199,7 @@ module SynapsePayRest
   		
   		response = client.post(subscriptions_path , payload)
 
-  		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], http_client: client, payload: response)
+  		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
 
     # Queries the API for all subscriptions and returns them as Subscriptions instances
@@ -210,8 +211,8 @@ module SynapsePayRest
   		subscriptions = client.get(subscriptions_path(options))
   		
   		return [] if subscriptions["subscriptions"].empty?
-  		response = subscriptions["subscriptions"].map { |subscription_data| Subscription.new(subscription_id: subscription_data["_id"], url: subscription_data["url"], http_client: client, payload: subscription_data)}
-  		subscriptions = Subscriptions.new(limit: subscriptions["limit"], page: subscriptions["page"], page_count: subscriptions["page_count"], subscriptions_count: subscriptions["subscription_count"], payload: response, http_client: client)
+  		response = subscriptions["subscriptions"].map { |subscription_data| Subscription.new(subscription_id: subscription_data["_id"], url: subscription_data["url"], payload: subscription_data)}
+  		subscriptions = Subscriptions.new(limit: subscriptions["limit"], page: subscriptions["page"], page_count: subscriptions["page_count"], subscriptions_count: subscriptions["subscription_count"], payload: response)
   	end
 
 
@@ -223,8 +224,30 @@ module SynapsePayRest
       raise ArgumentError, 'subscription_id must be a String' unless subscription_id.is_a?(String)
   		path = subscriptions_path + "/#{subscription_id}"
   		response = client.get(path)
-  		subscription = Subscription.new(subscription_id: response["_id"], url: response["url"], http_client: client, payload: response)
+  		subscription = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
+
+    # see https://docs.synapsefi.com/docs/update-subscription
+    # @param is_active [boolean]
+    # @param url [String]
+    # @param scope [Array<String>]
+    # @return [SynapsePayRest::Subscription] new instance corresponding to same API record
+    def update_subscriptions(subscription_id:, url:nil, scope:nil, is_active:nil)
+      raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+      raise ArgumentError, 'scope must be an array' unless options[:scope].is_a?(Array)
+      path = subscriptions_path + "/#{subscription_id}"
+
+    
+      payload = {}
+
+      payload["url"] = url if url
+      payload["scope"] = scope if scope
+      payload["is_active"] = is_active if is_active
+
+      response = client.patch(path, payload)
+      subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
+    end
+
 	
   	# Issues public key for client.
   	# @param client [SynapsePayRest::Client]
@@ -237,6 +260,36 @@ module SynapsePayRest
   		response = client.get(path)
   		response[ "public_key_obj"]
   	end
+
+    # @param zip [String] 
+    # @param radius [String]
+    # @param lat [String]
+    # @param lon [String]
+    # see https://docs.synapsefi.com/docs/locate-atms
+    def locate_atm(**options)
+      params = VALID_QUERY_PARAMS.map do |p|
+        options[p] ? "#{p}=#{options[p]}" : nil
+      end.compact
+
+      path = "/nodes/atms?"
+      path += params.join('&') if params.any?
+      atms = client.get(path)
+      atms 
+    end
+
+    # Get Quotes for Crypto Currencies
+    def get_crypto_quotes()
+      path = '/nodes/crypto-quotes'
+      quotes = client.get(path)
+      quotes 
+    end
+
+    # Get Market Data for Crypto Currencies
+    def get_crypto_market_data()
+      path = '/nodes/crypto-market-watch'
+      data = client.get(path)
+      data 
+    end
    
 
     private
@@ -298,17 +351,18 @@ end
 
 
 
-
-
-
-
-
 # grabs the refresh token and formats a refresh token payload 
     #def refresh_token(user_id:)
       #response = get_user(user_id:user_id)
       #refresh_token = response.refresh_token
     
-      #refresh_token = {"refresh_token" => refresh_token} 
+      #refresh_token 
+    #end
+
+    # = {"refresh_token" => refresh_token} 
+
+    #def oauth_path(user_id)
+      #path = "/oauth/#{user_id}"
     #end
 
     # options payload to change scope of oauth 
@@ -319,22 +373,24 @@ end
       #nil
     #end
 
-    #def oauth_path(user_id)
-      #path = "/oauth/#{user_id}"
-    #end
-
     # change users scope after creating a user
     # scope changes during oauth 
     # scope must be in array  
     #def oauth(user_id:, **scope)
-      #raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
-      #raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
-      #if [scope[:scope]].any? { |arg| !arg.is_a? Array}
-          #raise ArgumentError, 'scope must be Array'
-      #end
 
       #refresh_token = refresh_token(user_id: user_id)
       #oauth_path = oauth_path(user_id)
       #authenticate(refresh_token, oauth_path, scope)
       #nil 
     #end
+
+    #def oauth_path(user_id)
+      #path = "/oauth/#{user_id}"
+    #end
+
+    def registeer_fingerprint(user_id:, payload:)
+      path = oauth_path(user_id)
+      client.post(path,payload)
+    end
+
+

@@ -5,16 +5,14 @@ module SynapsePayRest
     # valid query params 
     VALID_QUERY_PARAMS = [:page, :per_page].freeze
 
-		attr_reader :node_id, :user_id, :payload, :full_dehydrate, :http_client, :user
+		attr_reader :node_id, :user_id, :payload, :full_dehydrate
 
 		attr_accessor 
 
-		def initialize(node_id:, user_id:,payload:, full_dehydrate:, http_client:, user:nil)
+		def initialize(node_id:, user_id:,payload:, full_dehydrate:)
 			@node_id = node_id
 			@full_dehydrate = full_dehydrate
-			@http_client = http_client
 			@user_id = user_id 
-      @user = user 
 			@payload = payload
 		end
 
@@ -274,7 +272,7 @@ module SynapsePayRest
           raise ArgumentError, "#{arg} must be nil or an Integer >= 1"
         end
       end
-      
+
       path = nodes_path(user_id: self.user_id, node_id: self.node_id) + "/statements"
       params = VALID_QUERY_PARAMS.map do |p|
         options[p] ? "#{p}=#{options[p]}" : nil

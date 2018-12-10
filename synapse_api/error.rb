@@ -17,22 +17,26 @@ module SynapsePayRest
     RequestDeclined = Class.new(ClientError)
 
     # Raised on the HTTP status code 403
-    Forbidden = Class.new(ClientError)
+    # Forbidden = Class.new(ClientError)
+    # '403' => SynapsePayRest::Error::Forbidden,
 
     # Raised on the HTTP status code 404
     NotFound = Class.new(ClientError)
 
     # Raised on the HTTP status code 406
-    NotAcceptable = Class.new(ClientError)
+    # NotAcceptable = Class.new(ClientError)
+    # '406' => SynapsePayRest::Error::NotAcceptable,
 
     # Raised on the HTTP status code 409
     Conflict = Class.new(ClientError)
 
     # Raised on the HTTP status code 415
-    UnsupportedMediaType = Class.new(ClientError)
+    # UnsupportedMediaType = Class.new(ClientError)
+    # '415' => SynapsePayRest::Error::UnsupportedMediaType,
 
     # Raised on the HTTP status code 422
-    UnprocessableEntity = Class.new(ClientError)
+    # UnprocessableEntity = Class.new(ClientError)
+    # '422' => SynapsePayRest::Error::UnprocessableEntity,
 
     # Raised on the HTTP status code 429
     TooManyRequests = Class.new(ClientError)
@@ -44,13 +48,15 @@ module SynapsePayRest
     InternalServerError = Class.new(ServerError)
 
     # Raised on the HTTP status code 502
-    BadGateway = Class.new(ServerError)
+    # BadGateway = Class.new(ServerError)
+    # '502' => SynapsePayRest::Error::BadGateway,
 
     # Raised on the HTTP status code 503
     ServiceUnavailable = Class.new(ServerError)
 
     # Raised on the HTTP status code 504
-    GatewayTimeout = Class.new(ServerError)
+    # GatewayTimeout = Class.new(ServerError)
+    # '504' => SynapsePayRest::Error::GatewayTimeout
 
     # HTTP status code to Error subclass mapping
     #
@@ -61,17 +67,11 @@ module SynapsePayRest
       '400' => SynapsePayRest::Error::BadRequest,
       '401' => SynapsePayRest::Error::Unauthorized,
       '402' => SynapsePayRest::Error::RequestDeclined,
-      '403' => SynapsePayRest::Error::Forbidden,
       '404' => SynapsePayRest::Error::NotFound,
-      '406' => SynapsePayRest::Error::NotAcceptable,
       '409' => SynapsePayRest::Error::Conflict,
-      '415' => SynapsePayRest::Error::UnsupportedMediaType,
-      '422' => SynapsePayRest::Error::UnprocessableEntity,
       '429' => SynapsePayRest::Error::TooManyRequests,
       '500' => SynapsePayRest::Error::InternalServerError,
-      '502' => SynapsePayRest::Error::BadGateway,
       '503' => SynapsePayRest::Error::ServiceUnavailable,
-      '504' => SynapsePayRest::Error::GatewayTimeout
     }.freeze
 
     # The SynapsePay API Error Code
@@ -103,6 +103,10 @@ module SynapsePayRest
       def parse_error(body)
         if body.nil? || body.empty?
           ['', nil, nil]
+        elsif body['mfa'] && body.is_a?(Hash) && body['error'].is_a?(Hash)
+          [body['mfa'], body['error_code'], body['http_code']] 
+        elsif body['message'] && body.is_a?(Hash) && body['error'].is_a?(Hash)
+          [body["message"]["en"], body['error_code'], body['http_code']]
         elsif body.is_a?(Hash) && body['error'].is_a?(Hash)
           [body['error']['en'], body['error_code'], body['http_code']]
         elsif body.is_a?(Hash) && body[:error].is_a?(Hash)

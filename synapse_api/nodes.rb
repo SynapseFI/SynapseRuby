@@ -4,14 +4,13 @@ module SynapsePayRest
 
 	class Nodes
 
-		attr_reader :page, :page_count, :limit, :http_client, :payload, :user_count, :nodes_count
+		attr_reader :page, :page_count, :limit, :payload, :nodes_count, :nodes_count
 
 		attr_accessor 
 
-		def initialize(page:,limit:, page_count:, nodes_count:, payload:,http_client:)
+		def initialize(page:,limit:, page_count:, nodes_count:, payload:)
 			@page = page 
 			@limit = limit
-			@http_client = http_client
 			@nodes_count = nodes_count
 			@page_count = page_count
 			@payload = payload
