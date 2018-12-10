@@ -4,7 +4,7 @@ require '../synapse_api/client'
 require 'pp'
 
 class UserTest < Minitest::Test
-  
+
   def setup
     @options = {
       client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
@@ -35,7 +35,7 @@ class UserTest < Minitest::Test
     }
 
     response = user.user_update(payload: payload)
-    
+
     assert_includes response.payload["logins"][0]["email"], payload[:update][:login][:email]
   end
 
@@ -62,8 +62,8 @@ class UserTest < Minitest::Test
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node = user.get_user_node(node_id: "5bfed4e8bab475008ea4e390", full_dehydrate: true)
-    
-    assert_equal true, node.full_dehydrate 
+
+    assert_equal true, node.full_dehydrate
   end
 
   def test_get_statements
@@ -92,7 +92,7 @@ class UserTest < Minitest::Test
       "extra": {
         "ip": "192.168.0.1"
       }
-    } 
+    }
     transaction = user.create_transaction(node_id: node_id, payload: payload)
 
     assert_instance_of SynapsePayRest::Transaction, transaction
@@ -104,9 +104,9 @@ class UserTest < Minitest::Test
     user = client.get_user(user_id: user)
     node_id = "5bfed4e8bab475008ea4e390"
     trans_id = "5c002ab7c9ab5b00ea5a8abd"
-    
+
     transaction = user.get_node_transaction(node_id: node_id, trans_id: trans_id)
-    
+
     assert_instance_of SynapsePayRest::Transaction, transaction
   end
 
@@ -115,9 +115,9 @@ class UserTest < Minitest::Test
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
-    
+
     transactions = user.get_all_node_transaction(node_id: node_id)
-    
+
     assert_instance_of SynapsePayRest::Transactions, transactions
   end
 
@@ -168,7 +168,7 @@ class UserTest < Minitest::Test
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
-    
+
 
     statements = user.get_node_statements(node_id: node_id)
     assert_equal "200", statements["http_code"]
@@ -187,7 +187,7 @@ class UserTest < Minitest::Test
 
     transaction = user.comment_transaction(node_id: node_id, trans_id: trans_id, payload: payload)
     assert_instance_of SynapsePayRest::Transaction, transaction
-  end 
+  end
 
   def test_cancel_transaction
     client = SynapsePayRest::Client.new(@options)
@@ -199,7 +199,7 @@ class UserTest < Minitest::Test
     #transaction = user.cancel_transaction(node_id: node_id, trans_id: trans_id)
     #transaction["_id"]
     #assert_equal trans_id,  transaction["_id"]
-  end 
+  end
 
   def test_update_node
     client = SynapsePayRest::Client.new(@options)
@@ -222,32 +222,39 @@ class UserTest < Minitest::Test
     node_id = "5bfed4e8bab475008ea4e390"
     payload = {
       "fee_node_id":"5bd9e7b3389f2400adb012ae",
-      "expedite":false 
+      "expedite":false
     }
 
     ship = user.ship_card(node_id: node_id, payload: payload)
 
     assert_equal node_id,  ship["_id"]
-  end 
+  end
 
   def test_reset_debit_card
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bfed4e8bab475008ea4e390"
-    
+
 
     reset = user.reset_debit_card(node_id: node_id)
 
     assert_equal node_id,  reset["_id"]
-  end 
+  end
 
 
-
-
-   
-  #def test_create_node
-    #client = SynapsePayRest::Client.new(@options)
-  #end
-
+  def test_create_node
+    client = SynapsePayRest::Client.new(@options)
+    user = "5bd9e16314c7fa00a3076960"
+    user = client.get_user(user_id: user)
+    payload = {
+      "type": "DEPOSIT-US",
+      "info": {
+        "nickname":"My Deposit Account"
+      }
+    }
+    node = user.create_node(payload: payload)
+    pp node
+    assert_equal 1, node.nodes_count
+  end
 end
