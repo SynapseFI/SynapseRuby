@@ -262,6 +262,30 @@ payload = {
 
 pp node.create_subnet(payload: payload)
 
+puts "========ACH BANK LOGIN=========="
+payload = {
+  "type": "ACH-US",
+  "info":{
+    "bank_id":"synapse_good",
+    "bank_pw":"test1234",
+    "bank_name":"fake"
+  }
+}
+
+mfa = user.create_node(payload: payload)
+puts mfa 
+access_token = mfa["access_token"]
+puts access_token
+
+puts "========Verify ACH=========="
+payload = {
+    "access_token":access_token,
+    "mfa_answer":"test_answer"
+}
+
+puts user.ach_mfa(payload: payload)
+
+
 
 
 
