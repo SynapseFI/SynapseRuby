@@ -346,11 +346,11 @@ module SynapsePayRest
     def subscriptions_path(**options)
     	path = "/subscriptions"
     	params = VALID_QUERY_PARAMS.map do |p|
-  		options[p] ? "#{p}=#{options[p]}" : nil
-  	end.compact
+        options[p] ? "#{p}=#{options[p]}" : nil
+      end.compact
 
-  	path += '?' + params.join('&') if params.any?
-    	path
+      path += '?' + params.join('&') if params.any?
+      path
     end
   end
 end

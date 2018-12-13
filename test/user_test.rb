@@ -1,14 +1,18 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
-require '../synapse_api/client'
+require '../lib/synapse_api/client'
 require 'pp'
+
+
+require 'dotenv'
+Dotenv.load("../.env")
 
 class UserTest < Minitest::Test
 
   def setup
     @options = {
-      client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
-      client_secret:    'client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
+      client_id:       ENV.fetch('TEST_CLIENT_ID'),
+      client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
       ip_address:       '127.0.0.1',
       fingerprint:      'static_pin',
       development_mode: true,
@@ -227,7 +231,7 @@ class UserTest < Minitest::Test
 
     ship = user.ship_card(node_id: node_id, payload: payload)
 
-    assert_equal node_id,  ship["_id"]
+    assert_equal node_id,  ship.node_id
   end
 
   def test_reset_debit_card
@@ -239,7 +243,7 @@ class UserTest < Minitest::Test
 
     reset = user.reset_debit_card(node_id: node_id)
 
-    assert_equal node_id,  reset["_id"]
+    assert_equal node_id,  reset.node_id
   end
 
 
@@ -254,7 +258,7 @@ class UserTest < Minitest::Test
       }
     }
     node = user.create_node(payload: payload)
-    pp node
+
     assert_equal 1, node.nodes_count
   end
 end

@@ -1,13 +1,16 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
-require '../synapse_api/client'
+require '../lib/synapse_api/client'
+
+require 'dotenv'
+Dotenv.load("../.env")
 
 
 class ClientTest < Minitest::Test
   def setup
     @options = {
-      client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
-      client_secret:    'client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
+      client_id:       ENV.fetch('TEST_CLIENT_ID'),
+      client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
       ip_address:       '127.0.0.1',
       fingerprint:      'static_pin',
       development_mode: true
@@ -25,7 +28,7 @@ class ClientTest < Minitest::Test
     assert_equal client.client.base_url, 'https://uat-api.synapsefi.com/v3.1'
   end
 
-  # Test @base_url when development_mode is false 
+  # Test @base_url when development_mode is false
   def test_endpoint_changes_when_development_mode_false
     @options[:development_mode] = false
     client = SynapsePayRest::Client.new(@options)
@@ -57,32 +60,32 @@ class ClientTest < Minitest::Test
       ]
     }
     @response = client.create_user(payload: payload)
-    assert_instance_of SynapsePayRest::User, @response 
+    assert_instance_of SynapsePayRest::User, @response
   end
 
   def test_get_users
     client = SynapsePayRest::Client.new(@options)
     response = client.get_users
-    assert_instance_of SynapsePayRest::Users, response 
+    assert_instance_of SynapsePayRest::Users, response
   end
 
   def test_get_transaction
     client = SynapsePayRest::Client.new(@options)
-    response = client.get_transaction()
-    assert_instance_of SynapsePayRest::Transactions, response 
+    response = client.get_all_transaction()
+    assert_instance_of SynapsePayRest::Transactions, response
   end
 
   def test_get_all_nodes
     client = SynapsePayRest::Client.new(@options)
     response = client.get_all_nodes(page: 20, per_page: 50)
-    assert_instance_of SynapsePayRest::Nodes, response 
+    assert_instance_of SynapsePayRest::Nodes, response
   end
-  
+
   # added sleep() methods for all subscription test method to not trigger SynapsePayRest::Error::TooManyRequests
   def test_create_subscriptions
     client = SynapsePayRest::Client.new(@options)
     response = client.create_subscriptions(scope: ["TRAN|PATCH"], url: "https://webhook.site/155f30bc-0c1a-42b9-b075-12c18fd242c5")
-    assert_instance_of SynapsePayRest::Subscription, response 
+    assert_instance_of SynapsePayRest::Subscription, response
     sleep(5)
   end
 
@@ -142,5 +145,5 @@ class ClientTest < Minitest::Test
     refute_nil response['public_key']
   end
 
-  
+
 end
