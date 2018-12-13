@@ -106,7 +106,7 @@ module SynapsePayRest
         elsif body['mfa'] && body.is_a?(Hash)
           ["#{body['mfa']["message"] } acces_token: #{body['mfa']["access_token"]}", body['error_code'], body['http_code']]
         elsif body[:mfa] && body.is_a?(Hash)
-          [body[:mfa], body[:error_code], body[:http_code]]
+          ["#{body[:mfa][:message] } acces_token: #{body[:mfa][:access_token]}", body[:error_code], body[:http_code]]
 
         elsif body['message'] && body.is_a?(Hash)
           [body["message"]["en"], body['error_code'], body['http_code']]
