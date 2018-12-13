@@ -1,16 +1,18 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
-require '../synapse_api/error'
-require '../synapse_api/client'
+require '../lib/synapse_api/error'
+require '../lib/synapse_api/client'
 require 'rest-client'
 require 'json'
 
+require 'dotenv'
+Dotenv.load("../.env")
 
 class ErrorTest < Minitest::Test
   def setup
     @options = {
-      client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
-      client_secret:    'client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
+      client_id:       ENV.fetch('TEST_CLIENT_ID'),
+      client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
       ip_address:       '127.0.0.1',
       fingerprint:      'static_pin',
       development_mode: true
@@ -28,17 +30,17 @@ class ErrorTest < Minitest::Test
           'X-SP-USER'    => '|static_pin',
           'X-SP-USER-IP' => '127.0.0.1'
       }
-    details = RestClient.get("https://uat-api.synapsefi.com/v3.1/users/#{user_id}", headers) 
+    details = RestClient.get("https://uat-api.synapsefi.com/v3.1/users/#{user_id}", headers)
     #print details.code
-    assert_equal 200, details.code 
+    assert_equal 200, details.code
   end
 
-  # oauthenticating a user without the correct fingerprint 
+  # oauthenticating a user without the correct fingerprint
   # users fingerprint is 234
   def test_202_response
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bfd9aa4c256c35cd27c74e1"
-    user = client.get_user(user_id:user_id) 
+    user = client.get_user(user_id:user_id)
     refresh_token = user.refresh_token
     refresh_token = {"refresh_token": refresh_token}
 
@@ -54,12 +56,12 @@ class ErrorTest < Minitest::Test
     details = JSON.parse(details)
     error = SynapsePayRest::Error.from_response(details)
     assert_instance_of SynapsePayRest::Error::Accepted, error
-    
-    assert_equal "202", details["http_code"] 
+
+    assert_equal "202", details["http_code"]
     assert_equal "10", details["error_code"]
   end
 
-  # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match 
+  # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match
   def test_400_response
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
@@ -70,19 +72,19 @@ class ErrorTest < Minitest::Test
           'X-SP-USER'    => '|static_pin',
           'X-SP-USER-IP' => '127.0.0.1'
       }
-   
+
     begin
-       RestClient.get("https://api.synapsefi.com/v3.1/users/#{user_id}", headers) 
+       RestClient.get("https://api.synapsefi.com/v3.1/users/#{user_id}", headers)
     rescue => e
-      details = e.response 
-      details = JSON.parse(details) 
+      details = e.response
+      details = JSON.parse(details)
     end
 
     error = SynapsePayRest::Error.from_response(details)
     assert_instance_of SynapsePayRest::Error::BadRequest, error
 
-    assert_equal "400", details["http_code"] 
-    assert_equal "200", details["error_code"] 
+    assert_equal "400", details["http_code"]
+    assert_equal "200", details["error_code"]
   end
 
   # getting a users transaction without oauthkey
@@ -96,19 +98,19 @@ class ErrorTest < Minitest::Test
           'X-SP-USER'    => '|static_pin',
           'X-SP-USER-IP' => '127.0.0.1'
       }
-   
+
     begin
-       RestClient.get("https://api.synapsefi.com/v3.1/users/#{user}/trans", headers) 
+       RestClient.get("https://api.synapsefi.com/v3.1/users/#{user}/trans", headers)
     rescue => e
-      details = e.response 
+      details = e.response
       details = JSON.parse(details)
-    end 
+    end
 
     error = SynapsePayRest::Error.from_response(details)
     assert_instance_of SynapsePayRest::Error::Unauthorized, error
 
-    assert_equal "401", details["http_code"] 
-    assert_equal "110", details["error_code"] 
+    assert_equal "401", details["http_code"]
+    assert_equal "110", details["error_code"]
   end
 
   # checks SynapsePayRest::Error to make sure class matches response to the right Error object
@@ -132,13 +134,13 @@ class ErrorTest < Minitest::Test
     assert_equal response, error.response
   end
 
-  # updating a a docuemnt that doesnt exist for a user 
+  # updating a a docuemnt that doesnt exist for a user
   def test_404_response
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
-    user = client.get_user(user_id:user_id) 
+    user = client.get_user(user_id:user_id)
     oauth_key = user.oauth_key
-   
+
     payload = {
       "documents":[{
         "id":"d02f580c1335a625ab2da2d7e53472d4e7fd664e633387654ebebe15ea696c91",
@@ -159,22 +161,22 @@ class ErrorTest < Minitest::Test
     begin
        RestClient::Request.execute(:method => :patch, :url => "https://uat-api.synapsefi.com/v3.1/users/#{user_id}", :payload => payload.to_json, :headers => headers, :timeout => 300)
     rescue => e
-      details = e.response 
+      details = e.response
       details = JSON.parse(details)
     end
 
     error = SynapsePayRest::Error.from_response(details)
     assert_instance_of SynapsePayRest::Error::NotFound, error
 
-    assert_equal "404", details["http_code"] 
-    assert_equal "404", details["error_code"] 
+    assert_equal "404", details["http_code"]
+    assert_equal "404", details["error_code"]
   end
 
-  # Creating a ACH-US node with a routing number that doesn't exist 
+  # Creating a ACH-US node with a routing number that doesn't exist
   def test_409_response
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
-    user = client.get_user(user_id:user_id) 
+    user = client.get_user(user_id:user_id)
     oauth_key = user.oauth_key
 
     headers = {
@@ -195,22 +197,22 @@ class ErrorTest < Minitest::Test
           "class": "CHECKING"
         }
       }
- 
+
     begin
        RestClient::Request.execute(:method => :post, :url => "https://uat-api.synapsefi.com/v3.1/users/#{user_id}/nodes", :payload => payload.to_json, :headers => headers, :timeout => 300)
     rescue => e
-      details = e.response 
+      details = e.response
       details = JSON.parse(details)
     end
 
     error = SynapsePayRest::Error.from_response(details)
 
     assert_instance_of SynapsePayRest::Error::Conflict, error
-    assert_equal "409", details["http_code"] 
-    assert_equal "400", details["error_code"] 
+    assert_equal "409", details["http_code"]
+    assert_equal "400", details["error_code"]
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object 
+  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
   def test_429_response
     response = {
       'error' => {

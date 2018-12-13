@@ -1,14 +1,16 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
-require '../synapse_api/client'
-require '../synapse_api/http_request'
+require '../lib/synapse_api/client'
+require '../lib/synapse_api/http_request'
 
+require 'dotenv'
+Dotenv.load("../.env")
 
 class HTTPClientTest < Minitest::Test
   def setup
     @options = {
-      client_id:       'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz',
-      client_secret:    'client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
+      client_id:       ENV.fetch('TEST_CLIENT_ID'),
+      client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
       ip_address:       '127.0.0.1',
       fingerprint:      'static_pin',
       development_mode: true,
@@ -26,7 +28,7 @@ class HTTPClientTest < Minitest::Test
 
   def test_config_exists_and_returns_a_hash
     @http_request = @client = SynapsePayRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
-    
+
     assert_instance_of Hash, @http_request.config
   end
 
