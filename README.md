@@ -31,7 +31,8 @@ $ gem install synapse_pay_rest
 
 ## Initializing Client
 
-- Returns Client instance 
+- Returns Client instance
+- Set raise_for_202 as true if you want 2FA and MFA to be raised
 
 ```bash
 args = {
@@ -42,13 +43,13 @@ args = {
 	development_mode: true
 }
 
-client  = SynapsePayRest::Client.new(args) 
+client  = SynapsePayRest::Client.new(args)
 ```
 
 ## Creating USER
 
 - A user is authenticated upon creation
-- Returns user instance 
+- Returns user instance
 
 ```bash
 payload = {
@@ -71,119 +72,143 @@ payload = {
   }
 }
 
-user = client.create_user(payload: payload) 
+user = client.create_user(payload: payload)
+```
+
+## Update Headers
+
+- Updates current headers for future request
+
+```bash
+headers = client.update_headers(fingerprint:nil, idemopotency_key:nil, ip_address:nil)
 ```
 
 ## Get USER
-- returns USER instance 
+- returns USER instance
 
 ```bash
 user_id = "1232"
 user = client.get_user(user_id: user_id,full_dehydrate: true)
 ```
 
-## Get all USERS 
--  returns USERS instance 
--  Array of users on a platform 
+## Get all USERS
+-  returns USERS instance
+-  Array of users on a platform
 
 ```bash
-client.get_users(** options)
+users = client.get_users(** options)
 ```
 
 ## Gets all transactions on a platform
 
-- returns Transactions instance 
+- returns Transactions instance
 - array of Transaction instance
 
 ```bash
 trans = client.get_transaction(page: nil, per_page: nil, query: nil)
 ```
 
-## Get all user specific transactions 
-- User is authenticated in order for developer to fetch their transaction
-- returns Transactions instance 
-- array of Transaction instance
+## Get all platform nodes
+- Returns Nodes instance
+- Array of Node instance
+- Page (optional params)
+- Per Page (optional params)
 
 ```bash
-client.get_transactions(user_id)
+Nodes = client.get_all_nodes(** options)
 ```
 
-## Get all User nodes
-- User is authenticated in order for developer to fetch their transaction
-- returns Nodes instance 
-- array of Node instance
+## Get Institutions
+
+- Returns institutions available for bank logins
+- Page (optional params)
+- Per Page (optional params)
 
 ```bash
-client.get_all_nodes(** options)
+institutions = client.get_all_institutions(** options)
 ```
 
 ## Create subscription
-- scope must be an array or else method will raise an error
-- returns subscription instace 
+- Scope must be an array or else method will raise an error
+- Returns subscription instace
 
 ```bash
 scope = ["TRAN|PATCH"]
 url = "webhooks.com"
-client.create_subscriptions(scope: scope, url: url )
+subscription = client.create_subscriptions(scope: scope, url: url )
 ```
 
 ## Get all platforms subscription
-- Developer has option to 
+- Developer has option to
+- Page (optional params)
+- Per Page (optional params)
 
 ```bash
-client.get_all_subscriptions(** options)
+subscriptions = client.get_all_subscriptions(** options)
 ```
 
-## Geta subscription by id
-- returns a subscription instance 
+## Get a subscription by id
+- returns a subscription instance
 
 ```bash
 subscription_id = "2342324"
-client.get_subscription(subscriptions_id)
+subscription = client.get_subscription(subscriptions_id:)
 ```
 
-## Update Subscription 
+## Update Subscription
 
-- updates a subscription scope or url 
-- returns a subscription instance 
+- Updates a subscription scope or url
+- Returns a subscription instance
 
 ```bash
 subscription_id = "2342324"
 scope = ["TRAN|PATCH"]
-client.update_subscriptions(subscription_id: subscription_id , scope: scope)
+subscription = client.update_subscriptions(subscription_id: subscription_id , scope: scope)
 ```
 
 ## Issue Public Key
-- returns api response 
+
+- Returns api response
 
 ```bash
 scope = ["USERS|GET"]
-client.issue_public_key(scope: scope)
+public_key = client.issue_public_key(scope: scope)
 ```
-
-## Dummy Transactions 
-
-- initiates a dummy transaction to a node
+## Locate ATM
+- Returns all atms nearby
+- Param zip
+- Param radius
+- Param lat
+- Param lon
 
 ```bash
-user_id = "1234"
-node = "4321"
-client.dummy_transactions(user_id: user_id,node_id: node_id)
+atms = client.locate_atm(** options)
 ```
 
-# User 
+## Get Crypto Quotes
 
-## Authenticate a USER
-
-- Grabs a user refresh_token using get_user
-- Post to Oauth to authenticate user, with optional params such as scope 
-- returns USER instance 
+- Returns Crypto Currencies Quotes
 
 ```bash
-user.authenticate(** options)
+crypto_quotes = client.get_crypto_quotes()
 ```
 
-## Update Documents 
+## Get Market Data
+
+- Returns Crypto market data
+- Param limit
+- Param currency
+
+
+```bash
+crypto_data = client.get_crypto_market_data(** options)
+```
+
+# User
+
+## Update User Documents
+
+- Updates user documents
 
 ```bash
 body = {
@@ -202,40 +227,257 @@ body = {
 
 user.user_update(payload:)
 ```
- 
-## Get Node 
+
+## Get User Node
+
+- Gets User node
+- Param full_dehydrate or force_refresh
 
 ```bash
 node_id = "5bd9e7b3389f2400adb012ae"
 
-user.get_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
+node = user.get_user_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
 ```
 
-## Get All Nodes
+## Get All User Nodes
 
-- options[page, per_page, type]
+- Options[page, per_page, type]
 ```bash
-user.get_all_nodes(**options)
+Nodes = user.get_all_nodes(**options)
 ```
 
-# Transactions
+## Authenticate a USER
 
-## Comment on status 
+- Authenticates users
+- Params Scope [Array]
+- Param Idempotency_key [String]  (optional)
 
 ```bash
-payload = {
-  "comment": "I deleted this transaction"
-}
+user.authenticate(** options)
+```
 
-transaction = trans.comment_transaction(payload: payload)
+## Select 2FA device
+
+- Register new fingerprint
+- Param device
+- Param Idempotency_key [String]  (optional)
+
+```bash
+response = user.select_2fa_device(device:)
+```
+
+## Confirm 2FA pin
+
+- Supply pin
+- Param pin
+- Param Idempotency_key [String]  (optional)
+
+```bash
+response = user.confirm_2fa_pin(pin:)
+```
+
+## Get user transactions
+
+- Returns transactons instance
+- Options[page, per_page, type]
+
+```bash
+transactions = user.get_user_transactions(** options)
+```
+
+## Create Node
+
+- Creates Node
+- Param node payload
+- Param Idempotency_key [String]  (optional)
+- Returns node or access token depending on node
+
+```bash
+node = user.create_node(payload:, options)
+```
+
+## ACH MFA
+
+- Submit MFA question and access token
+- Param MFA payload
+- Param Idempotency_key [String]  (optional)
+- Returns node or access token depending on node
+
+```bash
+node = user.ach_mfa(payload:, options)
+```
+
+## Create UBO
+
+- Upload an Ultimate Beneficial Ownership or REG GG Form
+
+```bash
+response = user.create_ubo(payload:)
+```
+
+## Get User Statement
+
+- Gets user statements
+- Options[page, per_page, type]
+
+```bash
+statement = user.get_user_statement()
+```
+
+## Ship Card
+
+- Initate card shipment
+- Param node_id
+- Param payload
+
+```bash
+node = user.ship_card()
+```
+
+## Reset Debit Cards
+
+- Get new card number and cvv
+- Param node_id
+
+```bash
+node = user.reset_debit_card(node_id:)
+```
+
+## Create Transaction
+
+- Create a node transaction
+- Param node_id
+- Param payload
+- Param Idempotency_key [String]  (optional)
+
+```bash
+transaction = user.create_transaction(node_id:, payload:, ** options)
+```
+
+## Get Node Transaction
+
+- Param node_id
+- Param trans_id
+
+```bash
+transaction = user.get_node_transaction(node_id:, trans_id:)
+```
+
+## Get all node transaction
+
+- Param node_id
+- Options[page, per_page, type]
+
+```bash
+nodes = user.get_all_node_transaction(node_id:, options)
+```
+
+## Verify Micro Deposit
+
+- Param node_id
+- Param payload
+
+```bash
+node = user.verify_micro_deposit(node_id:, payload:)
+```
+
+## Reinitiate Micro Deposit
+
+- Param node_id
+
+```bash
+node = user.reinitiate_micro_deposit(node_id:)
+```
+
+## Generate Apple pay Token
+
+- Param node_id
+- Param payload
+
+```bash
+response = user.generate_apple_pay_token(node_id:, payload:)
+```
+
+## Update Node
+
+- Param node_id
+- Param payload
+
+```bash
+node = user.generate(node_id:, payload:)
+```
+
+## Delete Node
+
+- Param node_id
+
+```bash
+response = user.delete_node(node_id:)
+```
+
+## Dummy Transactions
+
+- initiates a dummy transaction to a node
+- Param node_id [String]
+- Param is_credit [Boolean]
+
+```bash
+response = user.dummy_transactions(node_id:, is_credit:)
+```
+
+
+## Comment on status
+
+- Param node_id
+- Param trans_id
+- Param payload
+
+```bash
+transaction = user.comment_transaction(node_id:, trans_id:, payload:)
 ```
 
 ## Cancel Transaction
 
+- Param node_id
+- Param trans_id
+
 ```bash
-trans.cancel_transaction()
+response = user.cancel_transaction(node_id:, trans_id:)
 ```
 
+## Dispute Card Transactions
 
+- Param node_id
+- Param trans_id
+
+```bash
+response = user.dispute_user_transactions(node_id:, trans_id:)
+```
+
+## Get All Subnets
+
+- Param node_id
+- Options[page, per_page, type]
+
+```bash
+subnets = user.get_all_subnets(node_id:, options)
+```
+
+## Get Subnet
+
+- Param node_id
+- Param subnet_id
+
+```bash
+subnet = user.get_subnet(node_id:, subnet_id:)
+```
+## Get Node Statements
+
+- Param node_id
+- Options[page, per_page, type]
+
+```bash
+response = get_node_statements(node_id:, ** options)
+```
 
 

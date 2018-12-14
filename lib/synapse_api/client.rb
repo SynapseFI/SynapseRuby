@@ -210,7 +210,7 @@ module SynapsePayRest
     # Queries Synapse API for a subscription by subscription_id and returns a Subscription instances if found.
     # @param id [String] id of the subscription to find
     # @return [SynapsePayRest::Subscription]
-  	def get_subscription(subscription_id)
+  	def get_subscription(subscription_id:)
   		path = subscriptions_path + "/#{subscription_id}"
   		response = client.get(path)
   		subscription = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
