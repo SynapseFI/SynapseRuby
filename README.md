@@ -225,7 +225,7 @@ body = {
 }
 
 
-user.user_update(payload:)
+user = user.user_update(payload:)
 ```
 
 ## Get User Node
@@ -253,7 +253,7 @@ Nodes = user.get_all_nodes(**options)
 - Param Idempotency_key [String]  (optional)
 
 ```bash
-user.authenticate(** options)
+response = user.authenticate(** options)
 ```
 
 ## Select 2FA device
