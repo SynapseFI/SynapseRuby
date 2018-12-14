@@ -53,6 +53,37 @@ module SynapsePayRest
       user
 		end
 
+    # Queries the API for a node belonging to user(self),
+    # @return [SynapsePayRest::Node] or [Hash]
+    # @param node_id [String]
+    # @param full_dehydrate [String] (optional) if true, returns all trans data on node
+    # @param force_refresh [String] (optional) if true, force refresh yes will attempt updating the account balance and transactions
+    def get_user_node(node_id:, **options)
+      options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
+      options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
+      options[:force_refresh] = "yes" if options[:force_refresh] == true
+      options[:force_refresh] = "no" if options[:force_refresh] == false
+
+      path = node(node_id:node_id, full_dehydrate: options[:full_dehydrate],force_refresh: options[:force_refresh] )
+
+      node = client.get(path)
+
+      begin
+       node = client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       node = client.get(path)
+      end
+
+      node = Node.new(node_id: node['_id'],
+        user_id: self.user_id,
+        payload: node,
+        full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
+        type: node["type"]
+        )
+      node
+    end
+
     # Queries Synapse API for all nodes belonging to user (with optional
     # filters) and returns them as node instances.
     # @param page [String,Integer] (optional) response will default to 1
@@ -147,13 +178,6 @@ module SynapsePayRest
       pin_response
     end
 
-		# Returns users information
-    # @return [SynapsePayRest::User]
-		def info
-			user = {:id => self.user_id, :full_dehydrate => self.full_dehydrate, :payload => self.payload}
-			JSON.pretty_generate(user)
-		end
-
 	  # Queries the Synapse API get all user transactions belonging to a user
     # @return [Array<SynapsePayRest::Transactions>]
     # @param page [Integer] (optional) response will default to 1
@@ -236,6 +260,11 @@ module SynapsePayRest
       access_token ? access_token : nodes
     end
 
+
+    # Allows you to upload an Ultimate Beneficial Ownership
+    # @param payload [Hash]
+    # @see https://docs.synapsefi.com/docs/generate-ubo-form
+    # @return API response
     def create_ubo(payload:)
       path = get_user_path(user_id: self.user_id)
       path = path + nodes_path + "/ubo"
@@ -249,38 +278,6 @@ module SynapsePayRest
 
       response
     end
-
-
-    # Queries the API for a node belonging to user(self),
-    # @return [SynapsePayRest::Node] or [Hash]
-    # @param node_id [String]
-    # @param full_dehydrate [String] (optional) if true, returns all trans data on node
-    # @param force_refresh [String] (optional) if true, force refresh yes will attempt updating the account balance and transactions
-		def get_user_node(node_id:, **options)
-      options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
-      options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
-      options[:force_refresh] = "yes" if options[:force_refresh] == true
-      options[:force_refresh] = "no" if options[:force_refresh] == false
-
-			path = node(node_id:node_id, full_dehydrate: options[:full_dehydrate],force_refresh: options[:force_refresh] )
-
-			node = client.get(path)
-
-      begin
-       node = client.get(path)
-      rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       node = client.get(path)
-      end
-
-			node = Node.new(node_id: node['_id'],
-				user_id: self.user_id,
-				payload: node,
-				full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
-        type: node["type"]
-				)
-			node
-		end
 
     # Gets statement by user.
     # @param page [Integer]
@@ -496,6 +493,62 @@ module SynapsePayRest
       response
     end
 
+    # Adds a comment to the transaction's timeline/recent_status fields
+    # @param node_id [String]
+    # @param trans_id [String]
+    # @param payload [Hash]
+    # @return [SynapsePayRest::Transaction]
+    def comment_transaction(node_id:,trans_id:,payload:)
+
+      path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
+
+      begin
+        trans = client.patch(path, payload)
+      rescue SynapsePayRest::Error::Unauthorized
+        user.authenticate()
+        trans = client.patch(path, payload)
+      end
+      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
+      transaction
+    end
+
+    # Cancels transaction if it has not already settled
+    # @param node_id
+    # @param trans_id
+    # @return API response [Hash]
+    def cancel_transaction(node_id:, trans_id:)
+
+      path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
+      begin
+        response = client.delete(path)
+      rescue SynapsePayRest::Error::Unauthorized
+        user.authenticate()
+        response = client.delete(path)
+      end
+      response
+    end
+
+    # Dispute a transaction for a user
+    # @param node_id
+    # @param trans_id
+    # @see https://docs.synapsefi.com/docs/dispute-card-transaction
+    # @return API response [Hash]
+    def dispute_card_transactions(node_id:, trans_id:)
+
+      path = trans_path(user_id: user_id, node_id: node_id) + "/#{trans_id}"
+      path += "/dispute"
+      payload = {
+        "dispute_reason":"CHARGE_BACK"
+      }
+      begin
+        dispute = client.patch(path, payload)
+      rescue SynapsePayRest::Error::Unauthorized
+        user.authenticate()
+        dispute = client.patch(path, payload)
+      end
+      dispute
+    end
+
     # Creates subnet for a node
     # @param node_id [String]
     # @param payload [Hash]
@@ -591,63 +644,6 @@ module SynapsePayRest
 
       statements
     end
-
-    # Adds a comment to the transaction's timeline/recent_status fields
-    # @param node_id [String]
-    # @param trans_id [String]
-    # @param payload [Hash]
-    # @return [SynapsePayRest::Transaction]
-    def comment_transaction(node_id:,trans_id:,payload:)
-
-      path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
-
-      begin
-        trans = client.patch(path, payload)
-      rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
-        trans = client.patch(path, payload)
-      end
-      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
-      transaction
-    end
-
-    # Cancels transaction if it has not already settled
-    # @param node_id
-    # @param trans_id
-    # @return API response [Hash]
-    def cancel_transaction(node_id:, trans_id:)
-
-      path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
-      begin
-        response = client.delete(path)
-      rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
-        response = client.delete(path)
-      end
-      response
-    end
-
-    # Dispute a transaction for a user
-    # @param node_id
-    # @param trans_id
-    # @see https://docs.synapsefi.com/docs/dispute-card-transaction
-    # @return API response [Hash]
-    def dispute_card_transactions(node_id:, trans_id:)
-
-      path = trans_path(user_id: user_id, node_id: node_id) + "/#{trans_id}"
-      path += "/dispute"
-      payload = {
-        "dispute_reason":"CHARGE_BACK"
-      }
-      begin
-        dispute = client.patch(path, payload)
-      rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
-        dispute = client.patch(path, payload)
-      end
-      dispute
-    end
-
 
 		private
 
