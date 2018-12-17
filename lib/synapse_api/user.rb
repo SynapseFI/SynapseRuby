@@ -29,10 +29,8 @@ module SynapsePayRest
 			@full_dehydrate =full_dehydrate
 		end
 
-		# adding to base doc after base doc is created
-		# pass in full payload
-		# function used to make a base doc go away and update sub-doc
-		# see https://docs.synapsefi.com/docs/updating-existing-document
+		# Updates users documents
+		# @see https://docs.synapsefi.com/docs/updating-existing-document
     # @param payload [Hash]
     # @return [SynapsePayRest::User]
 		def user_update(payload:)
@@ -41,7 +39,7 @@ module SynapsePayRest
        response = client.patch(path, payload)
      rescue SynapsePayRest::Error::Unauthorized
        self.authenticate()
-       response =client.patch(path, documents)
+       response =client.patch(path, payload)
      end
 			user = User.new(
             user_id:                response['_id'],
@@ -50,14 +48,16 @@ module SynapsePayRest
             full_dehydrate:    false,
             payload:           response
           )
+
       user
 		end
 
-    # Queries the API for a node belonging to user(self),
-    # @return [SynapsePayRest::Node] or [Hash]
+    # Queries the API for a node belonging to user
     # @param node_id [String]
     # @param full_dehydrate [String] (optional) if true, returns all trans data on node
     # @param force_refresh [String] (optional) if true, force refresh yes will attempt updating the account balance and transactions
+    # for ACH node
+    # @return [SynapsePayRest::Node]
     def get_user_node(node_id:, **options)
       options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
       options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
@@ -66,13 +66,12 @@ module SynapsePayRest
 
       path = node(node_id:node_id, full_dehydrate: options[:full_dehydrate],force_refresh: options[:force_refresh] )
 
-      node = client.get(path)
-
       begin
-       node = client.get(path)
+        node = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       self.authenticate()
-       node = client.get(path)
+
+        self.authenticate()
+        node = client.get(path)
       end
 
       node = Node.new(node_id: node['_id'],
@@ -84,8 +83,7 @@ module SynapsePayRest
       node
     end
 
-    # Queries Synapse API for all nodes belonging to user (with optional
-    # filters) and returns them as node instances.
+    # Queries Synapse API for all nodes belonging to user
     # @param page [String,Integer] (optional) response will default to 1
     # @param per_page [String,Integer] (optional) response will default to 20
     # @param type [String] (optional)
@@ -125,29 +123,29 @@ module SynapsePayRest
 			refresh_token
 		end
 
-		# Quaries Synapse get oauth API for user after extracting users refresh token
-		# @params scope [Array<Strings>]
+		# Quaries Synapse oauth API for uto authenitcate user
+		# @params scope [Array<Strings>] (optional)
     # @param idempotency_key [String] (optional)
     # @see https://docs.synapsefi.com/docs/get-oauth_key-refresh-token
-		# Function does not support registering new fingerprint
 		def authenticate(**options)
       payload = {
         "refresh_token" => self.refresh_token()
       }
       payload["scope"] = options[:scope] if options[:scope]
 
-			path = oauth_path()
+      path = oauth_path()
+
 			oauth_response = client.post(path, payload,options)
       oauth_key = oauth_response['oauth_key']
       oauth_expires = oauth_response['expires_in']
       self.oauth_key = oauth_key
       self.expires_in = oauth_expires
-      # self.expire = 0
-      # seld. authenticate
       client.update_headers(oauth_key: oauth_key)
+
       oauth_response
 		end
 
+    # For registering new fingerprint
     # Supply 2FA device which pin should be sent to
     # @param device [String]
     # @param idempotency_key [String] (optional)
@@ -155,7 +153,7 @@ module SynapsePayRest
     # @return API response [Hash]
     def select_2fa_device(device:, **options)
       payload = {
-        "refresh_token": user.refresh_token,
+        "refresh_token": self.refresh_token,
         "phone_number": device
       }
       path = oauth_path()
@@ -163,22 +161,33 @@ module SynapsePayRest
       device_response
     end
 
-    # Supply pin confirmation
+    # Supply pin for 2FA confirmation
     # @param pin [String]
     # @param idempotency_key [String] (optional)
+    # @param scope [Array] (optional)
     # @see https://docs.synapsefi.com/docs/get-oauth_key-refresh-token
     # @return API response [Hash]
     def confirm_2fa_pin(pin:, **options)
       payload = {
-        "refresh_token": user.refresh_token,
+        "refresh_token": self.refresh_token,
         "validation_pin": pin
       }
+
+      payload["scope"] = options[:scope] if options[:scope]
+
       path = oauth_path()
+
       pin_response = client.post(path, payload, options)
+      oauth_key = pin_response['oauth_key']
+      oauth_expires = pin_response['expires_in']
+      self.oauth_key = oauth_key
+      self.expires_in = oauth_expires
+      client.update_headers(oauth_key: oauth_key)
+
       pin_response
     end
 
-	  # Queries the Synapse API get all user transactions belonging to a user
+	  # Queries the Synapse API to get all transactions belonging to a user
     # @return [Array<SynapsePayRest::Transactions>]
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
@@ -206,6 +215,7 @@ module SynapsePayRest
     end
 
     # Creates Synapse node
+    # @note Types of nodes [Card, IB/Deposit-US, Check/Wire Instructions]
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
     # @see https://docs.synapsefi.com/docs/node-resources
@@ -225,7 +235,6 @@ module SynapsePayRest
         nodes = response["nodes"].map { |nodes_data| Node.new(user_id: self.user_id, node_id: nodes_data["_id"], full_dehydrate: false, payload: response, type: nodes_data["type"])}
         nodes = Nodes.new(page: response["page"], limit: response["limit"], page_count: response["page_count"], nodes_count: response["node_count"], payload: nodes)
       else
-        #access_token = response["mfa"]
         access_token = response
       end
 
@@ -253,7 +262,6 @@ module SynapsePayRest
         nodes = response["nodes"].map { |nodes_data| Node.new(user_id: self.user_id, node_id: nodes_data["_id"], full_dehydrate: false, payload: response, type: nodes_data["type"])}
         nodes = Nodes.new(page: response["page"], limit: response["limit"], page_count: response["page_count"], nodes_count: response["node_count"], payload: nodes)
       else
-        #access_token = response["mfa"]
         access_token = response
       end
 
@@ -261,7 +269,7 @@ module SynapsePayRest
     end
 
 
-    # Allows you to upload an Ultimate Beneficial Ownership
+    # Allows you to upload an Ultimate Beneficial Ownership document
     # @param payload [Hash]
     # @see https://docs.synapsefi.com/docs/generate-ubo-form
     # @return API response
@@ -279,10 +287,11 @@ module SynapsePayRest
       response
     end
 
-    # Gets statement by user.
+    # Gets user statement
     # @param page [Integer]
     # @param per_page [Integer]
     # @see https://docs.synapsefi.com/docs/statements-by-user
+    # @return API response
     def get_user_statement(**options)
       path = get_user_path(user_id: self.user_id) + "/statements"
       params = VALID_QUERY_PARAMS.map do |p|
@@ -290,7 +299,13 @@ module SynapsePayRest
       end.compact
       path += '?' + params.join('&') if params.any?
 
-      statements = client.get(path)
+      begin
+       statements = client.get(path)
+      rescue SynapsePayRest::Error::Unauthorized
+       self.authenticate()
+       statements = client.get(path)
+      end
+
       statements
     end
 
@@ -305,13 +320,13 @@ module SynapsePayRest
       begin
        response = client.patch(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        response = client.patch(path,payload)
       end
       node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
-    # Resets the debit card number, card cvv, and expiration date
+    # Resets debit card number, cvv, and expiration date
     # @see https://docs.synapsefi.com/docs/reset-debit-card
     # @param node_id [String]
     # @return [SynapsePayRest::Node] or [Hash]
@@ -321,7 +336,7 @@ module SynapsePayRest
       begin
        response = client.patch(path,payload)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        response = client.patch(path,payload)
       end
       node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
@@ -338,7 +353,7 @@ module SynapsePayRest
       begin
        transaction = client.post(path,payload, options)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        transaction = client.post(path,payload, options)
       end
       transaction = Transaction.new(trans_id: transaction['_id'], payload: transaction, node_id: node_id)
@@ -354,7 +369,7 @@ module SynapsePayRest
       begin
         trans = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         trans = client.get(path)
       end
       transaction = Transaction.new(trans_id: trans['_id'], payload: trans, node_id: node_id)
@@ -362,7 +377,7 @@ module SynapsePayRest
     end
 
 
-    # Queries the API for all transactions belonging to the supplied node and returns
+    # Queries the API for all transactions belonging to the supplied node
     # @param node_id [String] node to which the transaction belongs
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
@@ -385,7 +400,7 @@ module SynapsePayRest
       begin
         trans = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         trans = client.get(path)
       end
 
@@ -403,7 +418,7 @@ module SynapsePayRest
       begin
         response = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         response = client.patch(path, payload)
       end
       node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
@@ -417,12 +432,13 @@ module SynapsePayRest
       begin
         response = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         response = client.patch(path, payload)
       end
       node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
+    # Generate tokenized info for Apple Wallet
     # @param node_id [String]
     # @param payload [Hash]
     # @see https://docs.synapsefi.com/docs/generate-applepay-token
@@ -431,12 +447,13 @@ module SynapsePayRest
       begin
         response = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         response = client.patch(path, payload)
       end
       response
     end
 
+    # Update supp_id, nickname, etc. for a node
     # @param node_id [String]
     # @param payload [Hash]
     # @see https://docs.synapsefi.com/docs/update-info
@@ -447,7 +464,7 @@ module SynapsePayRest
       begin
         update = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         update = client.patch(path, payload)
       end
       update = Node.new(node_id: node_id,
@@ -464,7 +481,7 @@ module SynapsePayRest
       begin
         delete = client.delete(path)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         delete = client.delete(path)
       end
       delete
@@ -472,7 +489,7 @@ module SynapsePayRest
 
     # Initiates dummy transactions to a node
     # @param node_id [String]
-    # @param is_credit [Boolean]
+    # @param is_credit [Boolean], for credit send true, for debit send false
     # @see https://docs.synapsefi.com/docs/trigger-dummy-transactions
     def dummy_transactions(node_id:, is_credit: nil)
 
@@ -487,13 +504,13 @@ module SynapsePayRest
       begin
        response = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        response = client.get(path)
       end
       response
     end
 
-    # Adds a comment to the transaction's timeline/recent_status fields
+    # Adds comment to the transactions
     # @param node_id [String]
     # @param trans_id [String]
     # @param payload [Hash]
@@ -505,7 +522,7 @@ module SynapsePayRest
       begin
         trans = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         trans = client.patch(path, payload)
       end
       transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
@@ -522,7 +539,7 @@ module SynapsePayRest
       begin
         response = client.delete(path)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         response = client.delete(path)
       end
       response
@@ -543,7 +560,7 @@ module SynapsePayRest
       begin
         dispute = client.patch(path, payload)
       rescue SynapsePayRest::Error::Unauthorized
-        user.authenticate()
+        self.authenticate()
         dispute = client.patch(path, payload)
       end
       dispute
@@ -560,7 +577,7 @@ module SynapsePayRest
       begin
        subnet = client.post(path,payload, options)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        subnet = client.post(path,payload, options)
       end
       subnet = Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
@@ -589,7 +606,7 @@ module SynapsePayRest
       begin
        subnets = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        subnets = client.get(path)
       end
 
@@ -600,7 +617,7 @@ module SynapsePayRest
       subnets
     end
 
-    # Queries a node for a specific subnet_id
+    # Queries a node for a specific subnet by subnet_id
     # @param node_id [String] id of node
     # @param subnet_id [String,void] (optional) id of a subnet to look up
     # @return [SynapsePayRest::Subnet]
@@ -611,17 +628,18 @@ module SynapsePayRest
       begin
        subnet = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        subnet = client.get(path)
       end
       subnet = Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
       subnet
     end
 
-    # Gets statement by node.
+    # Gets statement by node
     # @param page [Integer]
     # @param per_page [Integer]
     # @see https://docs.synapsefi.com/docs/statements-by-user
+    # @return API response [Hash]
     def get_node_statements(node_id:,**options)
       [options[:page], options[:per_page]].each do |arg|
         if arg && (!arg.is_a?(Integer) || arg < 1)
@@ -638,7 +656,7 @@ module SynapsePayRest
       begin
        statements = client.get(path)
       rescue SynapsePayRest::Error::Unauthorized
-       user.authenticate()
+       self.authenticate()
        statements = client.get(path)
       end
 
