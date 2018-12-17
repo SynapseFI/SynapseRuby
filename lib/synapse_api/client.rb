@@ -56,7 +56,7 @@ module SynapsePayRest
 
     end
 
-    # Sends a POST request to /users endpoint to create a new user
+    # Queries Synapse API to create a new user
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
     # @return[SynapsePayRest::User]
@@ -73,7 +73,6 @@ module SynapsePayRest
         full_dehydrate:    "no",
         payload:           response
       )
-      user = user.authenticate
       user
 	  end
 
@@ -108,8 +107,6 @@ module SynapsePayRest
             full_dehydrate:    options[:full_dehydrate] == "yes" ? true : false,
             payload:           response
           )
-
-      user.authenticate()
       user
   	end
 
@@ -354,6 +351,4 @@ module SynapsePayRest
     end
   end
 end
-
-
 

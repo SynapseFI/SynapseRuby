@@ -83,6 +83,7 @@ class UserTest < Minitest::Test
     client = SynapsePayRest::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
+
     node_id = "5bd9ebfe389f2400afb03a97"
     payload = {
       "to": {
@@ -252,7 +253,7 @@ class UserTest < Minitest::Test
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     payload = {
-      "type": "DEPOSIT-US",
+      "type": "IB-DEPOSIT-US",
       "info": {
         "nickname":"My Deposit Account"
       }

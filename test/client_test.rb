@@ -98,7 +98,7 @@ class ClientTest < Minitest::Test
 
   def test_get_subscription
     client = SynapsePayRest::Client.new(@options)
-    response = client.get_subscription("5beb6f2fbddf603229fe4ec5")
+    response = client.get_subscription(subscription_id: "5beb6f2fbddf603229fe4ec5")
     assert_instance_of SynapsePayRest::Subscription, response
     sleep(5)
   end

@@ -35,32 +35,6 @@ class ErrorTest < Minitest::Test
     assert_equal 200, details.code
   end
 
-  # oauthenticating a user without the correct fingerprint
-  # users fingerprint is 234
-  def test_202_response
-    client = SynapsePayRest::Client.new(@options)
-    user_id = "5bfd9aa4c256c35cd27c74e1"
-    user = client.get_user(user_id:user_id)
-    refresh_token = user.refresh_token
-    refresh_token = {"refresh_token": refresh_token}
-
-    headers = {
-        content_type: :json,
-        accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => '|static_pin',
-          'X-SP-USER-IP' => '127.0.0.1'
-      }
-
-    details = RestClient::Request.execute(:method => :post, :url => "https://uat-api.synapsefi.com/v3.1/oauth/#{user_id}", :payload => refresh_token.to_json, :headers => headers, :timeout => 300)
-    details = JSON.parse(details)
-    error = SynapsePayRest::Error.from_response(details)
-    assert_instance_of SynapsePayRest::Error::Accepted, error
-
-    assert_equal "202", details["http_code"]
-    assert_equal "10", details["error_code"]
-  end
-
   # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match
   def test_400_response
     client = SynapsePayRest::Client.new(@options)
@@ -139,6 +113,7 @@ class ErrorTest < Minitest::Test
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     user = client.get_user(user_id:user_id)
+    user.authenticate
     oauth_key = user.oauth_key
 
     payload = {
@@ -177,6 +152,7 @@ class ErrorTest < Minitest::Test
     client = SynapsePayRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     user = client.get_user(user_id:user_id)
+    user.authenticate
     oauth_key = user.oauth_key
 
     headers = {
