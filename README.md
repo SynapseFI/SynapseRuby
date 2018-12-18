@@ -48,7 +48,6 @@ client  = SynapsePayRest::Client.new(args)
 
 ## Creating USER
 
-- A user is authenticated upon creation
 - Returns user instance
 
 ```bash
