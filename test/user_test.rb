@@ -259,6 +259,7 @@ class UserTest < Minitest::Test
       }
     }
     node = user.create_node(payload: payload)
+    pp node
 
     assert_equal 1, node.nodes_count
   end
