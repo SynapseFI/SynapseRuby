@@ -33,3 +33,10 @@ end
 # s.add_development_dependency 'simplecov', '~> 0.12.0'  # counts the number of times each line of application code is run during your test suite
 # s.add_development_dependency 'm', '~> 1.5.0' # testing to run test line by line
 # s.add_development_dependency 'rake', '~> 10.0' # dont need, i dont have any rake test files
+
+
+source 'https://rubygems.org'
+source 'https://rubygems.org'
+
+
+gem 'synapse_pay_rest'

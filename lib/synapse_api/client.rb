@@ -85,7 +85,7 @@ module SynapsePayRest
       client.update_headers(fingerprint: fingerprint, idemopotency_key: idemopotency_key, ip_address: ip_address)
     end
 
-  	# Queries Synapse API for a user by id and returns a User instances if found
+  	# Queries Synapse API for a user by user_id
   	# @param user_id [String] id of the user to find
     # @param full_dehydrate [String] (optional) if true, returns all KYC on user
     # @see https://docs.synapsefi.com/docs/get-user
@@ -110,7 +110,7 @@ module SynapsePayRest
       user
   	end
 
-  	# Queries Synapse API for users associated with platform
+  	# Queries Synapse API for platform users
   	# @param query [String] (optional) response will be filtered to
     # users with matching name/email
     # @param page [Integer] (optional) response will default to 1
@@ -127,7 +127,7 @@ module SynapsePayRest
       users
   	end
 
-    # Queries Synapse for all transactions belonging to platform
+    # Queries Synapse for all transactions on platform
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
     # @return [Array<SynapsePayRest::Transactions>]
@@ -170,15 +170,16 @@ module SynapsePayRest
     # Queries Synapse API for all institutions available for bank logins
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
-    # @return response [Hash]
+    # @return API response [Hash]
   	def get_all_institutions(**options)
   		client.get(institutions_path(options))
   	end
 
-    # Creates a new subscription in the Synapse API for platform
+    # Queries Synapse API to create a webhook subscriptions for platform
     # @param scope [Array<String>]
     # @param idempotency_key [String] (optional)
     # @param url [String]
+    # @see https://docs.synapsefi.com/docs/create-subscription
     # @return [SynapsePayRest::Subscription]
   	def create_subscriptions(scope:, url:, **options)
   		payload = {
@@ -191,7 +192,7 @@ module SynapsePayRest
   		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
 
-    # Queries Synapse API for all subscriptions belonging to platform
+    # Queries Synapse API for all platform subscriptions
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
     # @return [Array<SynapsePayRest::Subscriptions>]
@@ -204,8 +205,8 @@ module SynapsePayRest
   	end
 
 
-    # Queries Synapse API for a subscription by subscription_id and returns a Subscription instances if found.
-    # @param id [String] id of the subscription to find
+    # Queries Synapse API for a subscription by subscription_id
+    # @param subscription_id [String]
     # @return [SynapsePayRest::Subscription]
   	def get_subscription(subscription_id:)
   		path = subscriptions_path + "/#{subscription_id}"
