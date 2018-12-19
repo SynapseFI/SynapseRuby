@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.author  = ['Emmanuel Mawutor']
   s.email    = 'help@synapsepay.com'
   s.summary  = 'SynapseFI v3 Rest Native API Library'
-  s.homepage = 'https://rubygems.org/gems/synapse_fi_rest'
+  s.homepage = 'https://rubygems.org/gems/synapse_fi'
   s.license  = 'MIT'
 
   s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
@@ -35,8 +35,7 @@ end
 # s.add_development_dependency 'rake', '~> 10.0' # dont need, i dont have any rake test files
 
 
-source 'https://rubygems.org'
-source 'https://rubygems.org'
 
 
-gem 'synapse_pay_rest'
+
+#gem 'synapse_pay_rest'
