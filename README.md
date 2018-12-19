@@ -21,7 +21,7 @@ $ bundle
 Or install it yourself by executing:
 
 ```bash
-$ gem install synapse_pay_rest
+$ gem install synapse_fi
 ```
 ## Documentation
 
