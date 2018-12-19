@@ -21,7 +21,7 @@ class ErrorTest < Minitest::Test
 
   # request to get a user
   def test_200_response
-    client = SynapsePayRest::Client.new(@options)
+    client = SynapseFIRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     headers = {
         content_type: :json,
@@ -37,7 +37,7 @@ class ErrorTest < Minitest::Test
 
   # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match
   def test_400_response
-    client = SynapsePayRest::Client.new(@options)
+    client = SynapseFIRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     headers = {
         content_type: :json,
@@ -54,8 +54,8 @@ class ErrorTest < Minitest::Test
       details = JSON.parse(details)
     end
 
-    error = SynapsePayRest::Error.from_response(details)
-    assert_instance_of SynapsePayRest::Error::BadRequest, error
+    error = SynapseFIRest::Error.from_response(details)
+    assert_instance_of SynapseFIRest::Error::BadRequest, error
 
     assert_equal "400", details["http_code"]
     assert_equal "200", details["error_code"]
@@ -63,7 +63,7 @@ class ErrorTest < Minitest::Test
 
   # getting a users transaction without oauthkey
   def test_401_response
-    client = SynapsePayRest::Client.new(@options)
+    client = SynapseFIRest::Client.new(@options)
     user = "5bea4453321f48299bac84e8"
     headers = {
         content_type: :json,
@@ -80,14 +80,14 @@ class ErrorTest < Minitest::Test
       details = JSON.parse(details)
     end
 
-    error = SynapsePayRest::Error.from_response(details)
-    assert_instance_of SynapsePayRest::Error::Unauthorized, error
+    error = SynapseFIRest::Error.from_response(details)
+    assert_instance_of SynapseFIRest::Error::Unauthorized, error
 
     assert_equal "401", details["http_code"]
     assert_equal "110", details["error_code"]
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
+  # checks SynapseFIRest::Error to make sure class matches response to the right Error object
   def test_402_response
     response = {
       'error' => {
@@ -98,10 +98,10 @@ class ErrorTest < Minitest::Test
       'success' => false
     }
 
-    error = SynapsePayRest::Error.from_response(response)
+    error = SynapseFIRest::Error.from_response(response)
 
-    assert_instance_of SynapsePayRest::Error::RequestDeclined, error
-    assert_kind_of SynapsePayRest::Error::RequestDeclined, error
+    assert_instance_of SynapseFIRest::Error::RequestDeclined, error
+    assert_kind_of SynapseFIRest::Error::RequestDeclined, error
     assert_equal "Request to the API failed", error.message
     assert_equal '400', error.code
     assert_equal '402', error.http_code
@@ -110,7 +110,7 @@ class ErrorTest < Minitest::Test
 
   # updating a a docuemnt that doesnt exist for a user
   def test_404_response
-    client = SynapsePayRest::Client.new(@options)
+    client = SynapseFIRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     user = client.get_user(user_id:user_id)
     user.authenticate
@@ -140,8 +140,8 @@ class ErrorTest < Minitest::Test
       details = JSON.parse(details)
     end
 
-    error = SynapsePayRest::Error.from_response(details)
-    assert_instance_of SynapsePayRest::Error::NotFound, error
+    error = SynapseFIRest::Error.from_response(details)
+    assert_instance_of SynapseFIRest::Error::NotFound, error
 
     assert_equal "404", details["http_code"]
     assert_equal "404", details["error_code"]
@@ -149,7 +149,7 @@ class ErrorTest < Minitest::Test
 
   # Creating a ACH-US node with a routing number that doesn't exist
   def test_409_response
-    client = SynapsePayRest::Client.new(@options)
+    client = SynapseFIRest::Client.new(@options)
     user_id = "5bea4453321f48299bac84e8"
     user = client.get_user(user_id:user_id)
     user.authenticate
@@ -181,14 +181,14 @@ class ErrorTest < Minitest::Test
       details = JSON.parse(details)
     end
 
-    error = SynapsePayRest::Error.from_response(details)
+    error = SynapseFIRest::Error.from_response(details)
 
-    assert_instance_of SynapsePayRest::Error::Conflict, error
+    assert_instance_of SynapseFIRest::Error::Conflict, error
     assert_equal "409", details["http_code"]
     assert_equal "400", details["error_code"]
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
+  # checks SynapseFIRest::Error to make sure class matches response to the right Error object
   def test_429_response
     response = {
       'error' => {
@@ -199,16 +199,16 @@ class ErrorTest < Minitest::Test
       'success' => false
     }
 
-    error = SynapsePayRest::Error.from_response(response)
+    error = SynapseFIRest::Error.from_response(response)
 
-    assert_instance_of SynapsePayRest::Error::TooManyRequests, error
-    assert_kind_of SynapsePayRest::Error::TooManyRequests, error
+    assert_instance_of SynapseFIRest::Error::TooManyRequests, error
+    assert_kind_of SynapseFIRest::Error::TooManyRequests, error
     assert_equal "Too many requests hit the API too quickly.", error.message
     assert_equal '429', error.code
     assert_equal response, error.response
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
+  # checks SynapseFIRest::Error to make sure class matches response to the right Error object
   def test_500_response
     response = {
       'error' => {
@@ -219,16 +219,16 @@ class ErrorTest < Minitest::Test
       'success' => false
     }
 
-    error = SynapsePayRest::Error.from_response(response)
+    error = SynapseFIRest::Error.from_response(response)
 
-    assert_instance_of SynapsePayRest::Error::InternalServerError, error
-    assert_kind_of SynapsePayRest::Error::InternalServerError, error
+    assert_instance_of SynapseFIRest::Error::InternalServerError, error
+    assert_kind_of SynapseFIRest::Error::InternalServerError, error
     assert_equal "Too many requests hit the API too quickly.", error.message
     assert_equal '402', error.code
     assert_equal response, error.response
   end
 
-  # checks SynapsePayRest::Error to make sure class matches response to the right Error object
+  # checks SynapseFIRest::Error to make sure class matches response to the right Error object
   def test_503_response
     response = {
       'error' => {
@@ -239,10 +239,10 @@ class ErrorTest < Minitest::Test
       'success' => false
     }
 
-    error = SynapsePayRest::Error.from_response(response)
+    error = SynapseFIRest::Error.from_response(response)
 
-    assert_instance_of SynapsePayRest::Error::ServiceUnavailable, error
-    assert_kind_of SynapsePayRest::Error::ServiceUnavailable, error
+    assert_instance_of SynapseFIRest::Error::ServiceUnavailable, error
+    assert_kind_of SynapseFIRest::Error::ServiceUnavailable, error
     assert_equal "Service Unavailable. The server is currently unable to handle the request due to a temporary overload or scheduled maintenance.", error.message
     assert_equal '503', error.code
     assert_equal response, error.response
