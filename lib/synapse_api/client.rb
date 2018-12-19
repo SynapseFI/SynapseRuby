@@ -14,7 +14,7 @@ require 'pp'
 
 
 
-module SynapsePayRest
+module Synapse
 	# Initializes various wrapper settings such as development mode and request
  	# header values
 
@@ -59,10 +59,10 @@ module SynapsePayRest
     # Queries Synapse API to create a new user
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
-    # @return[SynapsePayRest::User]
+    # @return[Synapse::User]
     # @see https://docs.synapsepay.com/docs/create-a-user payload structure
     def create_user(payload:, **options)
-    	raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+    	raise ArgumentError, 'client must be a Synapse::Client' unless self.is_a?(Client)
       response = client.post(user_path,payload, options)
 
 
@@ -89,9 +89,9 @@ module SynapsePayRest
   	# @param user_id [String] id of the user to find
     # @param full_dehydrate [String] (optional) if true, returns all KYC on user
     # @see https://docs.synapsefi.com/docs/get-user
-    # @return [SynapsePayRest::User]
+    # @return [Synapse::User]
   	def get_user(user_id:, **options)
-  		raise ArgumentError, 'client must be a SynapsePayRest::Client' unless self.is_a?(Client)
+  		raise ArgumentError, 'client must be a Synapse::Client' unless self.is_a?(Client)
   		raise ArgumentError, 'user_id must be a String' unless user_id.is_a?(String)
 
   		options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
@@ -116,7 +116,7 @@ module SynapsePayRest
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
     # @note users created this way are not automatically OAuthed
-    # @return [Array<SynapsePayRest::Users>]
+    # @return [Array<Synapse::Users>]
   	def get_users(**options)
   		path = user_path(options)
   		response = client.get(path)
@@ -130,7 +130,7 @@ module SynapsePayRest
     # Queries Synapse for all transactions on platform
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
-    # @return [Array<SynapsePayRest::Transactions>]
+    # @return [Array<Synapse::Transactions>]
   	def get_all_transaction(**options)
   		path = '/trans'
 
@@ -152,7 +152,7 @@ module SynapsePayRest
     # Queries Synapse API for all nodes belonging to platform
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
-    # @return [Array<SynapsePayRest::Nodes>]
+    # @return [Array<Synapse::Nodes>]
   	def get_all_nodes(**options)
   		[options[:page], options[:per_page]].each do |arg|
         if arg && (!arg.is_a?(Integer) || arg < 1)
@@ -180,7 +180,7 @@ module SynapsePayRest
     # @param idempotency_key [String] (optional)
     # @param url [String]
     # @see https://docs.synapsefi.com/docs/create-subscription
-    # @return [SynapsePayRest::Subscription]
+    # @return [Synapse::Subscription]
   	def create_subscriptions(scope:, url:, **options)
   		payload = {
             'scope' => scope,
@@ -195,7 +195,7 @@ module SynapsePayRest
     # Queries Synapse API for all platform subscriptions
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
-    # @return [Array<SynapsePayRest::Subscriptions>]
+    # @return [Array<Synapse::Subscriptions>]
   	def get_all_subscriptions(**options)
   		subscriptions = client.get(subscriptions_path(options))
 
@@ -207,7 +207,7 @@ module SynapsePayRest
 
     # Queries Synapse API for a subscription by subscription_id
     # @param subscription_id [String]
-    # @return [SynapsePayRest::Subscription]
+    # @return [Synapse::Subscription]
   	def get_subscription(subscription_id:)
   		path = subscriptions_path + "/#{subscription_id}"
   		response = client.get(path)
@@ -220,7 +220,7 @@ module SynapsePayRest
     # @param url [String]
     # @param scope [Array<String>]
     # see https://docs.synapsefi.com/docs/update-subscription
-    # @return [SynapsePayRest::Subscription]
+    # @return [Synapse::Subscription]
     def update_subscriptions(subscription_id:, url:nil, scope:nil, is_active:nil)
       path = subscriptions_path + "/#{subscription_id}"
 
@@ -236,7 +236,7 @@ module SynapsePayRest
 
 
   	# Issues public key for client
-  	# @param client [SynapsePayRest::Client]
+  	# @param client [Synapse::Client]
   	# @param scope [String]
     # @see https://docs.synapsefi.com/docs/issuing-public-key
   	# @note valid scope "OAUTH|POST,USERS|POST,USERS|GET,USER|GET,USER|PATCH,SUBSCRIPTIONS|GET,SUBSCRIPTIONS|POST,SUBSCRIPTION|GET,SUBSCRIPTION|PATCH,CLIENT|REPORTS,CLIENT|CONTROLS"

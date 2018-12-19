@@ -1,15 +1,13 @@
-require_relative './http_request'
-
-module SynapsePayRest
+module Synapse
 
 	class Transactions
 
 		attr_reader :page, :page_count, :limit, :payload, :trans_count
 
-		attr_accessor 
+		attr_accessor
 
 		def initialize(page:,limit:, trans_count:, payload:, page_count:)
-			@page = page 
+			@page = page
 			@limit = limit
 			@trans_count = trans_count
 			@payload = payload
