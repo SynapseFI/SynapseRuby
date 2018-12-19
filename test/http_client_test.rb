@@ -19,7 +19,7 @@ class HTTPClientTest < Minitest::Test
   end
 
   def test_base_url
-    @http_request = SynapsePayRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
+    @http_request = SynapseFIRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
 
     #@http_request = @client.client
 
@@ -27,7 +27,7 @@ class HTTPClientTest < Minitest::Test
   end
 
   def test_config_exists_and_returns_a_hash
-    @http_request = @client = SynapsePayRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
+    @http_request = @client = SynapseFIRest::HTTPClient.new(base_url: @options[:base_url] , client_id: @options[:client_id], client_secret: @options[:client_secret], fingerprint: @options[:fingerprint], ip_address: @options[:ip_address])
 
     assert_instance_of Hash, @http_request.config
   end
@@ -38,7 +38,7 @@ class HTTPClientTest < Minitest::Test
       idemopotency_key:     'new idemopotency_key'
     }
 
-    @client = SynapsePayRest::Client.new(@options)
+    @client = SynapseFIRest::Client.new(@options)
 
     @http_request = @client.client
 
