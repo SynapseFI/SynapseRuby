@@ -9,7 +9,7 @@ Not all API endpoints are supported.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'synapse_pay_rest'
+gem 'synapse_fi'
 ```
 
 And then execute:
