@@ -1,4 +1,4 @@
-module SynapsePayRest
+module Synapse
 
 	class Node
 

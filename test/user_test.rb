@@ -18,13 +18,13 @@ class UserTest < Minitest::Test
       development_mode: true,
       base_url: 'https://uat-api.synapsefi.com/v3.1'
     }
-    #client = SynapseFIRest::Client.new(@options)
+    #client = Synapse::Client.new(@options)
     #user = "5bd9e16314c7fa00a3076960"
     #user = client.get_user(user_id: user)
   end
 
   def test_user_update
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bfda38abaabfc00b0700187"
     user = client.get_user(user_id: user)
     payload = {
@@ -44,16 +44,16 @@ class UserTest < Minitest::Test
   end
 
   def test_get_all_user_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     transactions = user.get_user_transactions()
 
-    assert_instance_of SynapseFIRest::Transactions, transactions
+    assert_instance_of Synapse::Transactions, transactions
   end
 
   def test_get_all_user_nodes
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
 
@@ -62,7 +62,7 @@ class UserTest < Minitest::Test
   end
 
   def test_get_user_node
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node = user.get_user_node(node_id: "5bfed4e8bab475008ea4e390", full_dehydrate: true)
@@ -71,7 +71,7 @@ class UserTest < Minitest::Test
   end
 
   def test_get_statements
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     statements = user.get_user_statement()
@@ -80,7 +80,7 @@ class UserTest < Minitest::Test
   end
 
   def test_create_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
 
@@ -100,11 +100,11 @@ class UserTest < Minitest::Test
     }
     transaction = user.create_transaction(node_id: node_id, payload: payload)
 
-    assert_instance_of SynapseFIRest::Transaction, transaction
+    assert_instance_of Synapse::Transaction, transaction
   end
 
   def test_get_node_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bfed4e8bab475008ea4e390"
@@ -112,22 +112,22 @@ class UserTest < Minitest::Test
 
     transaction = user.get_node_transaction(node_id: node_id, trans_id: trans_id)
 
-    assert_instance_of SynapseFIRest::Transaction, transaction
+    assert_instance_of Synapse::Transaction, transaction
   end
 
   def test_get_all_node_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
 
     transactions = user.get_all_node_transaction(node_id: node_id)
 
-    assert_instance_of SynapseFIRest::Transactions, transactions
+    assert_instance_of Synapse::Transactions, transactions
   end
 
   def test_dummy_transactions
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
@@ -136,7 +136,7 @@ class UserTest < Minitest::Test
   end
 
   def test_create_subnet
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9ebfe389f2400afb03a97"
@@ -145,31 +145,31 @@ class UserTest < Minitest::Test
     }
 
     #subnet = user.create_subnet(node_id: node_id, payload: payload)
-    #assert_instance_of SynapseFIRest::Subnet, subnet
+    #assert_instance_of Synapse::Subnet, subnet
   end
 
   def test_get_all_subnets
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
     subnets = user.get_all_subnets(node_id: node_id)
-    assert_instance_of SynapseFIRest::Subnets, subnets
+    assert_instance_of Synapse::Subnets, subnets
   end
 
   def test_get_subnet
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
     subnet_id = "5c002eb460128b001f217787"
 
     subnets = user.get_subnet(node_id: node_id, subnet_id: subnet_id)
-    assert_instance_of SynapseFIRest::Subnet, subnets
+    assert_instance_of Synapse::Subnet, subnets
   end
 
   def test_get_node_statements
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
@@ -180,7 +180,7 @@ class UserTest < Minitest::Test
   end
 
   def test_comment_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
@@ -191,11 +191,11 @@ class UserTest < Minitest::Test
     }
 
     transaction = user.comment_transaction(node_id: node_id, trans_id: trans_id, payload: payload)
-    assert_instance_of SynapseFIRest::Transaction, transaction
+    assert_instance_of Synapse::Transaction, transaction
   end
 
   def test_cancel_transaction
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
@@ -207,7 +207,7 @@ class UserTest < Minitest::Test
   end
 
   def test_update_node
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bd9f755389f2400b9b0a25f"
@@ -221,7 +221,7 @@ class UserTest < Minitest::Test
   end
 
   def test_ship_card
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bfed4e8bab475008ea4e390"
@@ -236,7 +236,7 @@ class UserTest < Minitest::Test
   end
 
   def test_reset_debit_card
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     node_id = "5bfed4e8bab475008ea4e390"
@@ -249,7 +249,7 @@ class UserTest < Minitest::Test
 
 
   def test_create_node
-    client = SynapseFIRest::Client.new(@options)
+    client = Synapse::Client.new(@options)
     user = "5bd9e16314c7fa00a3076960"
     user = client.get_user(user_id: user)
     payload = {

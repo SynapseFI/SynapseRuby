@@ -3,7 +3,7 @@ require 'open-uri'
 require 'json'
 require_relative './error'
 
-module SynapsePayRest
+module Synapse
 	# Wrapper for HTTP requests using RestClient.
 	class HTTPClient
 
@@ -83,7 +83,7 @@ module SynapsePayRest
 		# @param payload [HASH]
 		# @param **options payload = idempotency_key [String] (optional) avoid accidentally performing the same operation twice
 	  # @return [Hash] API response
-    # @raise [SynapsePayRest::Error] subclass depends on HTTP response
+    # @raise [Synapse::Error] subclass depends on HTTP response
     def post(path, payload, **options)
     	#copy of current headers
     	headers = get_headers
@@ -109,7 +109,7 @@ module SynapsePayRest
     # Sends a GET request to the given path with the given payload.
 		# @param path [String]
 		# @return [Hash] API response
-		# @raise [SynapsePayRest::Error] subclass depends on HTTP response
+		# @raise [Synapse::Error] subclass depends on HTTP response
 		def get(path)
 			response = with_error_handling {RestClient.get(full_url(path), headers)}
 			puts 'RESPONSE:', JSON.parse(response) if @logging
@@ -127,7 +127,7 @@ module SynapsePayRest
     # Sends a DELETE request to the given path
     # @param path [String]
     # @return [Hash] API response
-    # @raise [SynapsePayRest::Error] subclass depends on HTTP response
+    # @raise [Synapse::Error] subclass depends on HTTP response
     def delete(path)
       response = with_error_handling {RestClient.delete(full_url(path), headers)}
       puts 'RESPONSE:', JSON.parse(response) if @logging
@@ -146,7 +146,7 @@ module SynapsePayRest
     # @param path [String]
     # @param payload [Hash]
     # @return [Hash] API response
-    # @raise [SynapsePayRest::Error] subclass depends on HTTP response
+    # @raise [Synapse::Error] subclass depends on HTTP response
 		def patch(path, payload)
 			response = with_error_handling {RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300)}
 			p 'RESPONSE:', JSON.parse(response) if @logging

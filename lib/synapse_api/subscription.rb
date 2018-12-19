@@ -1,12 +1,10 @@
-require_relative './http_request'
-
-module SynapsePayRest
+module Synapse
 
 	class Subscription
 
 		attr_reader :subscription_id, :url, :payload
 
-		attr_accessor 
+		attr_accessor
 
 		def initialize(subscription_id:, url:, payload:)
 			@subscription_id = subscription_id

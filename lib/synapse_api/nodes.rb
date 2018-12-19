@@ -1,6 +1,4 @@
-require_relative './http_request'
-
-module SynapsePayRest
+module Synapse
 
 	class Nodes
 
