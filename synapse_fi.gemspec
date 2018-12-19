@@ -1,10 +1,10 @@
 lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(synapse_api) unless $LOAD_PATH.include?(synapse_api)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'date'
 require 'synapse_api/version'
 
 Gem::Specification.new do |s|
-  s.name     = 'synapse_fi_rest'
+  s.name     = 'synapse_fi'
   s.version  = Synapse::VERSION
   s.date     = Date.today.to_s
   s.author  = ['Emmanuel Mawutor']
