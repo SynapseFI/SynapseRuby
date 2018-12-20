@@ -1,4 +1,6 @@
 module Synapse
   # Gem version
-  VERSION = '3.4.4'.freeze
+  VERSION = '0.0.0'.freeze
 end
+
+
