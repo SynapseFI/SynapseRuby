@@ -38,7 +38,7 @@ end
 
 
 
-#gem 'synapse_pay_rest'
+#gem 'synapse_fi-0.0.1'
 
 
 
