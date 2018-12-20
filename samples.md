@@ -2,16 +2,18 @@
 
 ## Initializing Client
 
+- Set up a .env file to fetch your client_id and client_secret
 - Returns Client instance
 - Set raise_for_202 as true if you want 2FA and MFA to be raised
 
 ```bash
 args = {
-  client_id:        "client_id",
-  client_secret:    "client_secret",
+  client_id:        ENV.fetch("client_id"),
+  client_secret:    ENV.fetch("client_secret"),
   fingerprint:      "fp",
   ip_address:       'ip',
-  development_mode: true
+  development_mode: true,
+  raise_for_202: true
 }
 
 client  = Synapse::Client.new(args)
