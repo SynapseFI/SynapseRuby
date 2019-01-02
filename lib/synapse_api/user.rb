@@ -110,18 +110,13 @@ module Synapse
 		end
 
 		# Queries Synapse get user API for users refresh_token
-    # @param full_dehydrate [Boolean]
     # @see https://docs.synapsefi.com/docs/get-user
     # @return refresh_token [String]
-		def refresh_token(**options)
-			options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
-			options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
-
-			path = get_user_path(user_id: self.user_id, full_dehydrate: options[:full_dehydrate])
-			response = client.get(path)
-			refresh_token = response["refresh_token"]
-			refresh_token
-		end
+		# def refresh_token()
+		# 	path = get_user_path(user_id: self.user_id)
+		# 	response = client.get(path)
+		# 	response["refresh_token"]
+		# end
 
 		# Quaries Synapse oauth API for uto authenitcate user
 		# @params scope [Array<Strings>] (optional)
@@ -129,7 +124,7 @@ module Synapse
     # @see https://docs.synapsefi.com/docs/get-oauth_key-refresh-token
 		def authenticate(**options)
       payload = {
-        "refresh_token" => self.refresh_token()
+        "refresh_token" => self.refresh_token
       }
       payload["scope"] = options[:scope] if options[:scope]
 
@@ -323,7 +318,7 @@ module Synapse
        self.authenticate()
        response = client.patch(path,payload)
       end
-      node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
     # Resets debit card number, cvv, and expiration date
@@ -339,7 +334,7 @@ module Synapse
        self.authenticate()
        response = client.patch(path,payload)
       end
-      node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
     # Creates a new transaction in the API belonging to the provided node
@@ -421,7 +416,7 @@ module Synapse
         self.authenticate()
         response = client.patch(path, payload)
       end
-      node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
     # Reinitiate microdeposits on a node
@@ -435,7 +430,7 @@ module Synapse
         self.authenticate()
         response = client.patch(path, payload)
       end
-      node = Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
     end
 
     # Generate tokenized info for Apple Wallet
@@ -666,7 +661,7 @@ module Synapse
 		private
 
 		def oauth_path()
-			path = "/oauth/#{self.user_id}"
+			"/oauth/#{self.user_id}"
 		end
 
 		def get_user_path(user_id:, **options)

@@ -190,7 +190,7 @@ module Synapse
     end
 
     def oauth_path(user_id)
-      path = "/oauth/#{user_id}"
+      "/oauth/#{user_id}"
     end
 
 		def full_url(path)

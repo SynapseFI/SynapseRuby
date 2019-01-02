@@ -38,7 +38,7 @@ module Synapse
     # @param raise_for_202 [Boolean]
 	 	# @param logging [Boolean] (optional) logs to stdout when true
     # @param log_to [String] (optional) file path to log to file (logging must be true)
-  	def initialize(client_id:, client_secret:, ip_address:, fingerprint:nil,development_mode: true, raise_for_202:nil, **options)
+    def initialize(client_id:, client_secret:, ip_address:, fingerprint:nil,development_mode: true, raise_for_202:nil, **options)
   		base_url = if development_mode
                    'https://uat-api.synapsefi.com/v3.1'
                  else
@@ -53,26 +53,23 @@ module Synapse
                                      ip_address: ip_address,
                                      raise_for_202: raise_for_202,
                                      **options)
-
     end
 
     # Queries Synapse API to create a new user
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
-    # @return[Synapse::User]
+    # @return [Synapse::User]
     # @see https://docs.synapsepay.com/docs/create-a-user payload structure
     def create_user(payload:, **options)
-    	raise ArgumentError, 'client must be a Synapse::Client' unless self.is_a?(Client)
       response = client.post(user_path,payload, options)
 
-
       user = User.new(
-        user_id:                response['_id'],
-        refresh_token:     response['refresh_token'],
-        client:            client,
-        full_dehydrate:    "no",
-        payload:           response
-      )
+            user_id:           response['_id'],
+            refresh_token:     response['refresh_token'],
+            client:            client,
+            full_dehydrate:    "no",
+            payload:           response
+          )
       user
 	  end
 
@@ -189,7 +186,7 @@ module Synapse
 
   		response = client.post(subscriptions_path , payload, options)
 
-  		subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
+  		Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
 
     # Queries Synapse API for all platform subscriptions
@@ -211,7 +208,7 @@ module Synapse
   	def get_subscription(subscription_id:)
   		path = subscriptions_path + "/#{subscription_id}"
   		response = client.get(path)
-  		subscription = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
+  		Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
 
     # updates subscription platform subscription
@@ -231,7 +228,7 @@ module Synapse
       payload["is_active"] = is_active if is_active
 
       response = client.patch(path, payload)
-      subscriptions = Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
+      Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
     end
 
 
