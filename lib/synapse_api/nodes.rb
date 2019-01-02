@@ -2,7 +2,7 @@ module Synapse
 
 	class Nodes
 
-		attr_reader :page, :page_count, :limit, :payload, :nodes_count, :nodes_count
+		attr_reader :page, :page_count, :limit, :payload, :nodes_count
 
 		attr_accessor
 
