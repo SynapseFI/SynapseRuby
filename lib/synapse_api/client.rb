@@ -211,7 +211,7 @@ module Synapse
   		Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
 
-    # updates subscription platform subscription
+    # Updates subscription platform subscription
     # @param subscription_id [String]
     # @param is_active [boolean]
     # @param url [String]
@@ -229,6 +229,13 @@ module Synapse
 
       response = client.patch(path, payload)
       Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
+    end
+
+    # Returns all of the webhooks belonging to client
+    # @return [Hash]
+    def webhook_logs()
+      path = subscriptions_path + "/logs"
+      respone = client.get(path)
     end
 
 
@@ -350,3 +357,19 @@ module Synapse
   end
 end
 
+puts "========initializing Cliient ========"
+
+args = {
+  client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
+  client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
+  fingerprint:      "fp",
+  ip_address:       'ip',
+  development_mode: true
+}
+
+client  = Synapse::Client.new(args)
+
+
+puts "======== Get webhooks =========="
+
+puts client.webhook_logs()
