@@ -37,7 +37,7 @@
         * [Get Transaction](#get-transaction)
         * [Comment on Status](#comment-on-status)
         * [Dispute Transaction](#dispute-transaction)
-        * [Cancel/Delete Transaction](#cancel-delete-transaction)
+        * [Cancel Delete Transaction](#cancel-delete-transaction)
 
 # Client
 
