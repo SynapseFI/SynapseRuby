@@ -41,7 +41,7 @@
 
 # Client
 
-##### Initializing Client
+##### Initialize Client
 
 - Set up a .env file to fetch your client_id and client_secret
 - Returns Client instance
