@@ -1,6 +1,6 @@
 # SynapseFI-Ruby-v2
 
-Native API library for SynapsePay REST v3.x
+Native API library for SynapseFI REST v3.x
 
 Not all API endpoints are supported.
 
@@ -31,6 +31,16 @@ $ gem install synapse_fi
 ## Contributing
 
 For minor issues, please open a pull request. For larger changes or features, please email hello@synapsepay.com. Please document and test any public constants/methods.
+
+## Running the Test Suite
+
+If you haven't already, set the `TEST_CLIENT_ID` and `TEST_CLIENT_SECRET` environment variables in `.env` file .
+
+To run all tests, execute:
+
+```bash
+rake test
+```
 
 ## License
 
