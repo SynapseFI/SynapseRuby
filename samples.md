@@ -1,25 +1,75 @@
+# Table of Contents
+- [Client](#client)
+    * [Initialize Client](#initialize-client)
+    * [Create User](#create-user)
+    * [Get User](#get-user)
+    * [Get Subscription](#get-subscription)
+    * [Update Subscription](#update-subscription)
+    * [Get All Users](#get-all-users)
+    * [Get All Client Transactions](#get-all-client-transactions)
+    * [Get All Client Nodes](#get-all-client-nodes)
+    * [Get All Client Institutions](#get-all-client-institutions)
+    * [Issue Public Key](#issue-public-key)
+- [User](#user)
+    * [Get New Oauth](#get-new-oauth)
+    * [Update User or Update/Add Documents](#update-user-or-update-add-documents)
+    * [Generate UBO](#generate-ubo)
+    * [Get All User Nodes](#get-all-user-nodes)
+    * [Get All User Transactions](#get-all-user-transactions)
+    + [Nodes](#nodes)
+        * [Create Node](#create-node)
+        * [Get Node](#get-node)
+        * [Get All User Nodes](#get-all-user-nodes-1)
+        * [Update Node](#update-node)
+        * [Ship Debit](#ship-debit)
+        * [Reset Debit](#reset-debit)
+        * [Verify Micro Deposit](#verify-micro-deposit)
+        * [Reinitiate Micro Deposit](#reinitiate-micro-deposit)
+        * [Generate Apple Pay](#generate-apple-pay)
+        * [Delete Node](#delete-node)
+        * [Get All Node Subnets](#get-all-node-subnets)
+        * [Get All Node Transactions](#get-all-node-transactions)
+    + [Subnets](#subnets)
+        * [Create Subnet](#create-subnet)
+        * [Get Subnet](#get-subnet)
+    + [Transactions](#transactions)
+        * [Create Transaction](#create-transaction)
+        * [Get Transaction](#get-transaction)
+        * [Comment on Status](#comment-on-status)
+        * [Dispute Transaction](#dispute-transaction)
+        * [Cancel/Delete Transaction](#cancel-delete-transaction)
+
 # Client
 
-## Initializing Client
+##### Initializing Client
 
 - Set up a .env file to fetch your client_id and client_secret
 - Returns Client instance
-- Set raise_for_202 as true if you want 2FA and MFA to be raised
 
 ```bash
 args = {
+  # synapse client_id
   client_id:        ENV.fetch("client_id"),
+  # synapse client_secret
   client_secret:    ENV.fetch("client_secret"),
+  # a hashed value, either unique to user or static for app
   fingerprint:      "fp",
+  # end user's IP
   ip_address:       'ip',
+  # (optional) requests go to sandbox endpoints if true
   development_mode: true,
+  # (optional) if true logs requests to stdout
+  logging: true,
+  # (optional) file path to write logs to
+  log_to: nil,
+  # (optional) rases for 2FA and MFA if set to true
   raise_for_202: true
 }
 
 client  = Synapse::Client.new(args)
 ```
 
-## Creating USER
+##### Create User
 
 - Returns user instance
 
@@ -47,15 +97,7 @@ payload = {
 user = client.create_user(payload: payload)
 ```
 
-## Update Headers
-
-- Updates current headers for future request
-
-```bash
-headers = client.update_headers(fingerprint:nil, idemopotency_key:nil, ip_address:nil)
-```
-
-## Get USER
+##### Get User
 - returns USER instance
 
 ```bash
@@ -63,15 +105,62 @@ user_id = "1232"
 user = client.get_user(user_id: user_id,full_dehydrate: true)
 ```
 
-## Get all USERS
+##### Create Subscription
+- Returns subscription instace
+
+```bash
+scope = {
+  "scope": [
+    "USERS|POST",
+    "USER|PATCH",
+    "NODES|POST",
+    "NODE|PATCH",
+    "TRANS|POST",
+    "TRAN|PATCH"
+  ],
+  "url": "https://requestb.in/zp216zzp"
+}
+subscription = client.create_subscriptions(scope: scope)
+```
+
+##### Get Subscription
+- returns a subscription instance
+
+```bash
+subscription_id = "2342324"
+subscription = client.get_subscription(subscriptions_id: subscription_id)
+```
+
+#### Update Subscription
+
+- Updates a subscription scope, active or url
+- Returns a subscription instance
+
+```bash
+subscription_id = "2342324"
+body = {
+  "is_active": true,
+  "scope": [
+    "USERS|POST",
+    "NODES|POST",
+    "TRANS|POST"
+  ]
+  "url": 'https://requestb.in/zp216zzp'
+}
+subscription = client.update_subscriptions(subscription_id: subscription_id , body: body)
+```
+
+##### Get All Users
 -  returns USERS instance
 -  Array of users on a platform
 
 ```bash
+# param page (optional) response will default to 1
+# param per_page [Integer] (optional) response will default to 20
 users = client.get_users(** options)
 ```
 
-## Gets all transactions on a platform
+#### Get All Client Transactions
 
 - returns Transactions instance
 - array of Transaction instance
@@ -80,107 +169,49 @@ users = client.get_users(** options)
 trans = client.get_transaction(page: nil, per_page: nil, query: nil)
 ```
 
-## Get all platform nodes
+#### Get All Client Nodes
 - Returns Nodes instance
 - Array of Node instance
 - Page (optional params)
 - Per Page (optional params)
 
 ```bash
+# param page (optional) response will default to 1
+# param per_page [Integer] (optional) response will default to 20
 Nodes = client.get_all_nodes(** options)
 ```
 
-## Get Institutions
+#### Get All Client Institutions
 
 - Returns institutions available for bank logins
 - Page (optional params)
 - Per Page (optional params)
 
 ```bash
+# param page (optional) response will default to 1
+# param per_page [Integer] (optional) response will default to 20
 institutions = client.get_all_institutions(** options)
 ```
 
-## Create subscription
-- Scope must be an array or else method will raise an error
-- Returns subscription instace
-
-```bash
-scope = ["TRAN|PATCH"]
-url = "webhooks.com"
-subscription = client.create_subscriptions(scope: scope, url: url )
-```
-
-## Get all platforms subscription
-- Developer has option to
-- Page (optional params)
-- Per Page (optional params)
-
-```bash
-subscriptions = client.get_all_subscriptions(** options)
-```
-
-## Get a subscription by id
-- returns a subscription instance
-
-```bash
-subscription_id = "2342324"
-subscription = client.get_subscription(subscriptions_id:)
-```
-
-## Update Subscription
-
-- Updates a subscription scope or url
-- Returns a subscription instance
-
-```bash
-subscription_id = "2342324"
-scope = ["TRAN|PATCH"]
-subscription = client.update_subscriptions(subscription_id: subscription_id , scope: scope)
-```
-
-## Issue Public Key
+#### Issue Public Key
 
 - Returns api response
 
 ```bash
-scope = ["USERS|GET"]
+scope = "USERS|GET,USER|GET,USER|PATCH"
 public_key = client.issue_public_key(scope: scope)
-```
-## Locate ATM
-- Returns all atms nearby
-- Param zip
-- Param radius
-- Param lat
-- Param lon
-
-```bash
-atms = client.locate_atm(** options)
-```
-
-## Get Crypto Quotes
-
-- Returns Crypto Currencies Quotes
-
-```bash
-crypto_quotes = client.get_crypto_quotes()
-```
-
-## Get Market Data
-
-- Returns Crypto market data
-- Param limit
-- Param currency
-
-
-```bash
-crypto_data = client.get_crypto_market_data(** options)
 ```
 
 # User
 
-## Update User Documents
+##### Get New Oauth
 
-- Updates user documents
+```bash
+scope =["USERS|GET,USER|GET,USER|PATCH"]
+user.authenticate(scope: scope)
+```
+
+##### Update User or Update/Add Documents
 
 ```bash
 body = {
@@ -195,261 +226,246 @@ body = {
     "remove_phone_number":"901.111.1111"
     }
 }
-
-
-user = user.user_update(payload:)
+user = user.user_update(payload:body)
 ```
 
-## Get User Node
+##### Create UBO
 
-- Gets User node
-- Param full_dehydrate or force_refresh
+- Upload an Ultimate Beneficial Ownership or REG GG Form
 
 ```bash
-node_id = "5bd9e7b3389f2400adb012ae"
-
-node = user.get_user_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
+body = {
+   "entity_info": {
+      "cryptocurrency": True,
+      "msb": {
+         "federal": True,
+         "states": ["AL"]
+      },
+      "public_company": False,
+      "majority_owned_by_listed": False,
+      "registered_SEC": False,
+      "regulated_financial": False,
+      "gambling": False,
+      "document_id": "2a4a5957a3a62aaac1a0dd0edcae96ea2cdee688ec6337b20745eed8869e3ac8"
+   ...
+}
+user.create_ubo(payload:body)
 ```
 
-## Get All User Nodes
+#### Get All User Nodes
 
 - Options[page, per_page, type]
 ```bash
-Nodes = user.get_all_nodes(**options)
+Nodes = user.get_all_nodes(page=1, per_page=5, type='ACH-US')
 ```
 
-## Authenticate a USER
-
-- Authenticates users
-- Params Scope [Array]
-- Param Idempotency_key [String]  (optional)
-
-```bash
-response = user.authenticate(** options)
-```
-
-## Select 2FA device
-
-- Register new fingerprint
-- Param device
-- Param Idempotency_key [String]  (optional)
-
-```bash
-response = user.select_2fa_device(device:)
-```
-
-## Confirm 2FA pin
-
-- Supply pin
-- Param pin
-- Param Idempotency_key [String]  (optional)
-
-```bash
-response = user.confirm_2fa_pin(pin:)
-```
-
-## Get user transactions
+#### Get All User Transactions
 
 - Returns transactons instance
 - Options[page, per_page, type]
 
 ```bash
-transactions = user.get_user_transactions(** options)
+# param page (optional) response will default to 1
+# param per_page (optional) response will default to 20
+transactions = user.get_user_transactions(page=1, per_page=5)
 ```
 
-## Create Node
-
-- Creates Node
-- Param node payload
-- Param Idempotency_key [String]  (optional)
-- Returns node or access token depending on node
+### Nodes
+##### Create Node
+Refer to the following docs for how to setup the payload for a specific Node type:
+- [Deposit Accounts](https://docs.synapsefi.com/v3.1/docs/deposit-accounts)
+- [Card Issuance](https://docs.synapsefi.com/v3.1/docs/card-issuance)
+- [ACH-US with Logins](https://docs.synapsefi.com/v3.1/docs/add-ach-us-node)
+- [ACH-US MFA](https://docs.synapsefi.com/v3.1/docs/add-ach-us-node-via-bank-logins-mfa)
+- [ACH-US with AC/RT](https://docs.synapsefi.com/v3.1/docs/add-ach-us-node-via-acrt-s)
+- [INTERCHANGE-US](https://docs.synapsefi.com/v3.1/docs/interchange-us)
+- [CHECK-US](https://docs.synapsefi.com/v3.1/docs/check-us)
+- [CRYPTO-US](https://docs.synapsefi.com/v3.1/docs/crypto-us)
+- [WIRE-US](https://docs.synapsefi.com/v3.1/docs/add-wire-us-node)
+- [WIRE-INT](https://docs.synapsefi.com/v3.1/docs/add-wire-int-node)
+- [IOU](https://docs.synapsefi.com/v3.1/docs/add-iou-node)
 
 ```bash
-node = user.create_node(payload:, options)
+body = {
+  "type": "DEPOSIT-US",
+  "info":{
+      "nickname":"My Checking"
+  }
+}
+node = user.create_node(payload:, idempotency_key='123456')
 ```
 
-## ACH MFA
-
-- Submit MFA question and access token
-- Param MFA payload
-- Param Idempotency_key [String]  (optional)
-- Returns node or access token depending on node
+##### Get Node
 
 ```bash
-node = user.ach_mfa(payload:, options)
+node_id = "5bd9e7b3389f2400adb012ae"
+node = user.get_user_node(node_id: node_id, full_dehydrate: true, force_refresh: true)
 ```
 
-## Create UBO
+#### Get All User Nodes
 
-- Upload an Ultimate Beneficial Ownership or REG GG Form
-
-```bash
-response = user.create_ubo(payload:)
-```
-
-## Get User Statement
-
-- Gets user statements
 - Options[page, per_page, type]
-
 ```bash
-statement = user.get_user_statement()
+Nodes = user.get_all_nodes(page=1, per_page=5, type='ACH-US')
 ```
 
-## Ship Card
+#### Update Node
 
-- Initate card shipment
 - Param node_id
 - Param payload
 
 ```bash
-node = user.ship_card()
+node_id = '5ba05ed620b3aa005882c52a'
+body = {
+  "supp_id":"new_supp_id_1234"
+}
+node = user.generate(node_id:node_id, payload:body)
 ```
 
-## Reset Debit Cards
-
-- Get new card number and cvv
-- Param node_id
+#### Ship Card
 
 ```bash
-node = user.reset_debit_card(node_id:)
+node_id = '5ba05ed620b3aa005882c52a'
+
+body = {
+  "fee_node_id":"5ba05e7920b3aa006482c5ad",
+  "expedite":True
+}
+node = user.ship_card(node_id: node_id, payload: body)
 ```
 
-## Create Transaction
-
-- Create a node transaction
-- Param node_id
-- Param payload
-- Param Idempotency_key [String]  (optional)
+#### Reset Debit Cards
 
 ```bash
-transaction = user.create_transaction(node_id:, payload:, ** options)
+node_id = '5ba05ed620b3aa005882c52a'
+node = user.reset_debit_card(node_id: node_id)
 ```
 
-## Get Node Transaction
+#### Verify Micro Deposit
+
+```bash
+node_id = '5ba05ed620b3aa005882c52a'
+body = {
+  "micro":[0.1,0.1]
+}
+node = user.verify_micro_deposit(node_id: node_id, payload: body)
+```
+
+#### Reinitiate Micro Deposit
+
+```bash
+node_id = '5ba05ed620b3aa005882c52a'
+node = user.reinitiate_micro_deposit(node_id: node_id)
+```
+
+##### Generate Apple Pay
+
+```bash
+node_id = '5ba05ed620b3aa005882c52a'
+body = {
+  "certificate": "your applepay cert",
+  "nonce": "9c02xxx2",
+  "nonce_signature": "4082f883ae62d0700c283e225ee9d286713ef74"
+}
+response = user.generate_apple_pay_token(node_id: node_id, payload: body)
+```
+
+#### Delete Node
+
+```bash
+node_id = '594e606212e17a002f2e3251'
+response = user.delete_node(node_id: node_id)
+```
+
+#### Get All Node Subnets
+
+```bash
+node_id = '594e606212e17a002f2e3251'
+subnets = user.get_all_subnets(node_id:node_id, page=4, per_page=10)
+```
+
+#### Get All Node Transactions
+
+```bash
+node_id = '594e606212e17a002f2e3251'
+nodes = user.get_all_node_transaction(node_id: node_id, page=4, per_page=10)
+```
+
+
+### Subnets
+
+##### Create Subnet
+```python
+node_id = '594e606212e17a002f2e3251'
+body = {
+  "nickname":"Test AC/RT"
+}
+user.create_subnet(node_id: node_id, payload: body)
+```
+
+#### Get Subnet
+```bash
+node_id = '594e606212e17a002f2e3251'
+subn_id = '59c9f77cd412960028b99d2b'
+subnet = user.get_subnet(node_id:, subnet_id:)
+```
+
+### Transactions
+
+#### Create Transaction
+```bash
+node_id = '594e606212e17a002f2e3251'
+body = {
+  "to": {
+    "type": "ACH-US",
+    "id": "594e6e6c12e17a002f2e39e4"
+  },
+  "amount": {
+    "amount": 20.1,
+    "currency": "USD"
+  },
+  "extra": {
+    "ip": "192.168.0.1"
+  }
+}
+transaction = user.create_transaction(node_id: node_id, payload: body, idempotency_key:"2435")
+```
+
+#### Get Transaction
 
 - Param node_id
 - Param trans_id
 
 ```bash
-transaction = user.get_node_transaction(node_id:, trans_id:)
+node_id = '594e606212e17a002f2e3251'
+trans_id = '594e72124599e8002fe62e4f'
+transaction = user.get_node_transaction(node_id: node_id, trans_id: trans_id)
 ```
 
-## Get all node transaction
-
-- Param node_id
-- Options[page, per_page, type]
+#### Comment on status
 
 ```bash
-nodes = user.get_all_node_transaction(node_id:, options)
+node_id = '594e606212e17a002f2e3251'
+trans_id = '594e72124599e8002fe62e4f'
+body = 'Pending verification...'
+transaction = user.comment_transaction(node_id: node_id, trans_id: trans_id, payload: body)
 ```
 
-## Verify Micro Deposit
-
-- Param node_id
-- Param payload
+#### Dispute Transaction
 
 ```bash
-node = user.verify_micro_deposit(node_id:, payload:)
-```
-
-## Reinitiate Micro Deposit
-
-- Param node_id
-
-```bash
-node = user.reinitiate_micro_deposit(node_id:)
-```
-
-## Generate Apple pay Token
-
-- Param node_id
-- Param payload
-
-```bash
-response = user.generate_apple_pay_token(node_id:, payload:)
-```
-
-## Update Node
-
-- Param node_id
-- Param payload
-
-```bash
-node = user.generate(node_id:, payload:)
-```
-
-## Delete Node
-
-- Param node_id
-
-```bash
-response = user.delete_node(node_id:)
-```
-
-## Dummy Transactions
-
-- initiates a dummy transaction to a node
-- Param node_id [String]
-- Param is_credit [Boolean]
-
-```bash
-response = user.dummy_transactions(node_id:, is_credit:)
-```
-
-
-## Comment on status
-
-- Param node_id
-- Param trans_id
-- Param payload
-
-```bash
-transaction = user.comment_transaction(node_id:, trans_id:, payload:)
-```
-
-## Cancel Transaction
-
-- Param node_id
-- Param trans_id
-
-```bash
-response = user.cancel_transaction(node_id:, trans_id:)
-```
-
-## Dispute Card Transactions
-
-- Param node_id
-- Param trans_id
-
-```bash
+node_id = '594e606212e17a002f2e3251'
+trans_id = '594e72124599e8002fe62e4f'
+dispute_reason = {
+  "dispute_reason":"CHARGE_BACK"
+}
 response = user.dispute_user_transactions(node_id:, trans_id:)
 ```
 
-## Get All Subnets
-
-- Param node_id
-- Options[page, per_page, type]
+#### Cancel/Delete Transaction
 
 ```bash
-subnets = user.get_all_subnets(node_id:, options)
+node_id = '594e606212e17a002f2e3251'
+trans_id = '594e72124599e8002fe62e4f'
+response = user.cancel_transaction(node_id: node_id, trans_id: trans_id)
 ```
-
-## Get Subnet
-
-- Param node_id
-- Param subnet_id
-
-```bash
-subnet = user.get_subnet(node_id:, subnet_id:)
-```
-## Get Node Statements
-
-- Param node_id
-- Options[page, per_page, type]
-
-```bash
-response = get_node_statements(node_id:, ** options)
-```
-
-

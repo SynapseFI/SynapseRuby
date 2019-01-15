@@ -112,7 +112,6 @@ module Synapse
     # users with matching name/email
     # @param page [Integer] (optional) response will default to 1
     # @param per_page [Integer] (optional) response will default to 20
-    # @note users created this way are not automatically OAuthed
     # @return [Array<Synapse::Users>]
   	def get_users(**options)
   		path = user_path(options)
@@ -173,18 +172,12 @@ module Synapse
   	end
 
     # Queries Synapse API to create a webhook subscriptions for platform
-    # @param scope [Array<String>]
+    # @param scope [Hash]
     # @param idempotency_key [String] (optional)
-    # @param url [String]
     # @see https://docs.synapsefi.com/docs/create-subscription
     # @return [Synapse::Subscription]
-  	def create_subscriptions(scope:, url:, **options)
-  		payload = {
-            'scope' => scope,
-            'url' => url,
-          }
-
-  		response = client.post(subscriptions_path , payload, options)
+  	def create_subscriptions(scope:, **options)
+  		response = client.post(subscriptions_path , scope, options)
 
   		Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
   	end
@@ -213,21 +206,13 @@ module Synapse
 
     # Updates subscription platform subscription
     # @param subscription_id [String]
-    # @param is_active [boolean]
-    # @param url [String]
-    # @param scope [Array<String>]
+    # @param body [Hash]
     # see https://docs.synapsefi.com/docs/update-subscription
     # @return [Synapse::Subscription]
-    def update_subscriptions(subscription_id:, url:nil, scope:nil, is_active:nil)
+    def update_subscriptions(subscription_id:, body:)
       path = subscriptions_path + "/#{subscription_id}"
 
-      payload = {}
-
-      payload["url"] = url if url
-      payload["scope"] = scope if scope
-      payload["is_active"] = is_active if is_active
-
-      response = client.patch(path, payload)
+      response = client.patch(path, body)
       Subscription.new(subscription_id: response["_id"], url: response["url"], payload: response)
     end
 
@@ -240,12 +225,10 @@ module Synapse
 
 
   	# Issues public key for client
-  	# @param client [Synapse::Client]
   	# @param scope [String]
     # @see https://docs.synapsefi.com/docs/issuing-public-key
   	# @note valid scope "OAUTH|POST,USERS|POST,USERS|GET,USER|GET,USER|PATCH,SUBSCRIPTIONS|GET,SUBSCRIPTIONS|POST,SUBSCRIPTION|GET,SUBSCRIPTION|PATCH,CLIENT|REPORTS,CLIENT|CONTROLS"
   	def issue_public_key(scope:)
-  		raise ArgumentError, 'scope must be a string' unless scope.is_a?(String)
   		path = '/client?issue_public_key=YES'
   		path += "&scope=#{scope}"
   		response = client.get(path)

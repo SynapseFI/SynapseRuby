@@ -545,13 +545,10 @@ module Synapse
     # @param trans_id
     # @see https://docs.synapsefi.com/docs/dispute-card-transaction
     # @return API response [Hash]
-    def dispute_card_transactions(node_id:, trans_id:)
+    def dispute_card_transactions(node_id:, trans_id:, payload:)
 
       path = trans_path(user_id: user_id, node_id: node_id) + "/#{trans_id}"
       path += "/dispute"
-      payload = {
-        "dispute_reason":"CHARGE_BACK"
-      }
       begin
         dispute = client.patch(path, payload)
       rescue Synapse::Error::Unauthorized
