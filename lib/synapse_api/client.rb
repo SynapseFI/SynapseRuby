@@ -340,19 +340,19 @@ module Synapse
   end
 end
 
-puts "========initializing Cliient ========"
+# puts "========initializing Cliient ========"
 
-args = {
-  client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
-  client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
-  fingerprint:      "fp",
-  ip_address:       'ip',
-  development_mode: true
-}
+# args = {
+#   client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
+#   client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
+#   fingerprint:      "fp",
+#   ip_address:       'ip',
+#   development_mode: true
+# }
 
-client  = Synapse::Client.new(args)
+# client  = Synapse::Client.new(args)
 
 
-puts "======== Get webhooks =========="
+# puts "======== Get webhooks =========="
 
-puts client.webhook_logs()
+# puts client.webhook_logs()

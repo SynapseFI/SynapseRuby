@@ -157,7 +157,7 @@ subscription = client.update_subscriptions(subscription_id: subscription_id , bo
 ```bash
 # param page (optional) response will default to 1
 # param per_page [Integer] (optional) response will default to 20
-users = client.get_users(** options)
+users = client.get_users(page: 5, per_page: 5)
 ```
 
 #### Get All Client Transactions
@@ -166,7 +166,7 @@ users = client.get_users(** options)
 - array of Transaction instance
 
 ```bash
-trans = client.get_transaction(page: nil, per_page: nil, query: nil)
+trans = client.get_transaction(page: 5, per_page: 5)
 ```
 
 #### Get All Client Nodes
@@ -178,7 +178,7 @@ trans = client.get_transaction(page: nil, per_page: nil, query: nil)
 ```bash
 # param page (optional) response will default to 1
 # param per_page [Integer] (optional) response will default to 20
-Nodes = client.get_all_nodes(** options)
+Nodes = client.get_all_nodes(page: 5, per_page: 5)
 ```
 
 #### Get All Client Institutions
@@ -190,7 +190,7 @@ Nodes = client.get_all_nodes(** options)
 ```bash
 # param page (optional) response will default to 1
 # param per_page [Integer] (optional) response will default to 20
-institutions = client.get_all_institutions(** options)
+institutions = client.get_all_institutions(page: 5, per_page: 5)
 ```
 
 #### Issue Public Key
@@ -254,7 +254,6 @@ user.create_ubo(payload:body)
 
 #### Get All User Nodes
 
-- Options[page, per_page, type]
 ```bash
 Nodes = user.get_all_nodes(page=1, per_page=5, type='ACH-US')
 ```
@@ -262,7 +261,6 @@ Nodes = user.get_all_nodes(page=1, per_page=5, type='ACH-US')
 #### Get All User Transactions
 
 - Returns transactons instance
-- Options[page, per_page, type]
 
 ```bash
 # param page (optional) response will default to 1
@@ -304,7 +302,6 @@ node = user.get_user_node(node_id: node_id, full_dehydrate: true, force_refresh:
 
 #### Get All User Nodes
 
-- Options[page, per_page, type]
 ```bash
 Nodes = user.get_all_nodes(page=1, per_page=5, type='ACH-US')
 ```
