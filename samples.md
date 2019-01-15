@@ -462,7 +462,7 @@ dispute_reason = {
 response = user.dispute_user_transactions(node_id:, trans_id:)
 ```
 
-#### Cancel/Delete Transaction
+#### Cancel Delete Transaction
 
 ```bash
 node_id = '594e606212e17a002f2e3251'
