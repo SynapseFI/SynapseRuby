@@ -1,6 +1,8 @@
 # require 'minitest/autorun'
 # require 'minitest/reporters'
 
+# require_relative "../lib/synapse_api"
+
 # require 'dotenv'
 # Dotenv.load
 
