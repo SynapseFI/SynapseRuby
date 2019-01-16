@@ -93,7 +93,12 @@ module Synapse
     		headers = headers.merge({'X-SP-IDEMPOTENCY-KEY' => options[:idempotency_key]})
     	end
 
-    	response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
+    	response = with_error_handling { RestClient::Request.execute(:method =>  :post,
+                                                                   :url =>     full_url(path),
+                                                                   :payload => payload.to_json,
+                                                                   :headers => headers,
+                                                                   :timeout => 300
+                                                                   ) }
     	puts 'RESPONSE:', JSON.parse(response) if @logging
     	response = JSON.parse(response)
 
@@ -148,7 +153,12 @@ module Synapse
     # @return [Hash] API response
     # @raise [Synapse::Error] subclass depends on HTTP response
 		def patch(path, payload)
-			response = with_error_handling {RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300)}
+			response = with_error_handling {RestClient::Request.execute(:method =>  :patch,
+                                                                  :url =>     full_url(path),
+                                                                  :payload => payload.to_json,
+                                                                  :headers => headers,
+                                                                  :timeout => 300
+                                                                  )}
 			p 'RESPONSE:', JSON.parse(response) if @logging
 			response = JSON.parse(response)
 

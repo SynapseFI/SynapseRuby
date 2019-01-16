@@ -29,7 +29,6 @@ module Synapse
   	# Alias for #http_client
   	alias_method :client, :http_client
 
-
   	# @param client_id [String] should be stored in environment variable
     # @param client_secret [String] should be stored in environment variable
     # @param ip_address [String] user's IP address
@@ -52,7 +51,8 @@ module Synapse
                                      fingerprint: fingerprint,
                                      ip_address: ip_address,
                                      raise_for_202: raise_for_202,
-                                     **options)
+                                     **options
+                                     )
     end
 
     # Queries Synapse API to create a new user
@@ -63,14 +63,12 @@ module Synapse
     def create_user(payload:, **options)
       response = client.post(user_path,payload, options)
 
-      user = User.new(
-            user_id:           response['_id'],
-            refresh_token:     response['refresh_token'],
-            client:            client,
-            full_dehydrate:    "no",
-            payload:           response
-          )
-      user
+      User.new(user_id:           response['_id'],
+               refresh_token:     response['refresh_token'],
+               client:            client,
+               full_dehydrate:    "no",
+               payload:           response
+              )
 	  end
 
     # Update headers in HTTPClient class
@@ -97,14 +95,12 @@ module Synapse
   		path = user_path(user_id: user_id, full_dehydrate: options[:full_dehydrate])
   		response = client.get(path)
 
-  		user = User.new(
-            user_id:                response['_id'],
-            refresh_token:     response['refresh_token'],
-            client:            client,
-            full_dehydrate:    options[:full_dehydrate] == "yes" ? true : false,
-            payload:           response
-          )
-      user
+  		User.new(user_id:         response['_id'],
+               refresh_token:   response['refresh_token'],
+               client:          client,
+               full_dehydrate:  options[:full_dehydrate] == "yes" ? true : false,
+               payload:         response
+              )
   	end
 
   	# Queries Synapse API for platform users
@@ -117,10 +113,19 @@ module Synapse
   		path = user_path(options)
   		response = client.get(path)
   		return [] if response["users"].empty?
-  		users = response["users"].map { |user_data| User.new(user_id: user_data['_id'], refresh_token: user_data['refresh_token'], client: client, full_dehydrate: "no", payload: user_data)}
-  		users = Users.new(limit: response["limit"], page: response["page"], page_count: response["page_count"], user_count: response["user_count"], payload: users, http_client: client)
-
-      users
+  		users = response["users"].map { |user_data| User.new(user_id:         user_data['_id'],
+                                                           refresh_token:   user_data['refresh_token'],
+                                                           client:          client,
+                                                           full_dehydrate:  "no",
+                                                           payload:         user_data
+                                                           )}
+  		Users.new(limit:       response["limit"],
+                page:        response["page"],
+                page_count:  response["page_count"],
+                user_count:  response["user_count"],
+                payload:     users,
+                http_client: client
+               )
   	end
 
     # Queries Synapse for all transactions on platform
@@ -140,9 +145,12 @@ module Synapse
 
   		return [] if trans["trans"].empty?
   		response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
-  		trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
-  		trans
-
+  		Transactions.new(limit:       trans["limit"],
+                       page:        trans["page"],
+                       page_count:  trans["page_count"],
+                       trans_count: trans["trans_count"],
+                       payload:     response
+                       )
   	end
 
     # Queries Synapse API for all nodes belonging to platform
@@ -159,8 +167,17 @@ module Synapse
   		nodes = client.get(path)
 
   		return [] if nodes["nodes"].empty?
-  		response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], payload: node_data, full_dehydrate: "no")}
-  		nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], nodes_count: nodes["node_count"], payload: response)
+  		response = nodes["nodes"].map { |node_data| Node.new(node_id:        node_data['_id'],
+                                                           user_id:        node_data['user_id'],
+                                                           payload:        node_data,
+                                                           full_dehydrate: "no"
+                                                           )}
+  		Nodes.new(limit:       nodes["limit"],
+                page:        nodes["page"],
+                page_count:  nodes["page_count"],
+                nodes_count: nodes["node_count"],
+                payload:     response
+               )
   	end
 
     # Queries Synapse API for all institutions available for bank logins
@@ -190,10 +207,16 @@ module Synapse
   		subscriptions = client.get(subscriptions_path(options))
 
   		return [] if subscriptions["subscriptions"].empty?
-  		response = subscriptions["subscriptions"].map { |subscription_data| Subscription.new(subscription_id: subscription_data["_id"], url: subscription_data["url"], payload: subscription_data)}
-  		subscriptions = Subscriptions.new(limit: subscriptions["limit"], page: subscriptions["page"], page_count: subscriptions["page_count"], subscriptions_count: subscriptions["subscription_count"], payload: response)
+  		response = subscriptions["subscriptions"].map { |subscription_data| Subscription.new(subscription_id: subscription_data["_id"],
+                                                                                           url: subscription_data["url"],
+                                                                                           payload: subscription_data)}
+  		Subscriptions.new(limit:               subscriptions["limit"],
+                        page:                subscriptions["page"],
+                        page_count:          subscriptions["page_count"],
+                        subscriptions_count: subscriptions["subscription_count"],
+                        payload:             response
+                        )
   	end
-
 
     # Queries Synapse API for a subscription by subscription_id
     # @param subscription_id [String]
@@ -222,7 +245,6 @@ module Synapse
       path = subscriptions_path + "/logs"
       respone = client.get(path)
     end
-
 
   	# Issues public key for client
   	# @param scope [String]
@@ -283,9 +305,7 @@ module Synapse
       data
     end
 
-
     private
-
     def user_path(user_id: nil, **options)
     	path = "/users"
     	path += "/#{user_id}" if user_id
@@ -340,19 +360,3 @@ module Synapse
   end
 end
 
-# puts "========initializing Cliient ========"
-
-# args = {
-#   client_id:        "client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz",
-#   client_secret:    "client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0",
-#   fingerprint:      "fp",
-#   ip_address:       'ip',
-#   development_mode: true
-# }
-
-# client  = Synapse::Client.new(args)
-
-
-# puts "======== Get webhooks =========="
-
-# puts client.webhook_logs()

@@ -22,7 +22,7 @@ module Synapse
     # @param payload [Hash]
     # @param full_dehydrate [Boolean]
 		def initialize(user_id:,refresh_token:, client:,payload:, full_dehydrate:)
-			@user_id = user_id
+      @user_id = user_id
 			@client = client
 			@refresh_token = refresh_token
 			@payload =payload
@@ -34,29 +34,27 @@ module Synapse
     # @param payload [Hash]
     # @return [Synapse::User]
 		def user_update(payload:)
-			path = get_user_path(user_id: self.user_id)
+      path = get_user_path(user_id: self.user_id)
      begin
        response = client.patch(path, payload)
      rescue Synapse::Error::Unauthorized
        self.authenticate()
        response =client.patch(path, payload)
      end
-			user = User.new(
-            user_id:                response['_id'],
-            refresh_token:     response['refresh_token'],
-            client:            client,
-            full_dehydrate:    false,
-            payload:           response
-          )
-
-      user
+			user = User.new(user_id:        response['_id'],
+                      refresh_token:  response['refresh_token'],
+                      client:         client,
+                      full_dehydrate: false,
+                      payload:        response
+                     )
 		end
 
     # Queries the API for a node belonging to user
     # @param node_id [String]
-    # @param full_dehydrate [String] (optional) if true, returns all trans data on node
-    # @param force_refresh [String] (optional) if true, force refresh yes will attempt updating the account balance and transactions
-    # for ACH node
+    # @param full_dehydrate [String] (optional)
+    #   if true, returns all trans data on node
+    # @param force_refresh [String] (optional) if true, force refresh
+    #  will attempt updating the account balance and transactions on node
     # @return [Synapse::Node]
     def get_user_node(node_id:, **options)
       options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
@@ -64,7 +62,9 @@ module Synapse
       options[:force_refresh] = "yes" if options[:force_refresh] == true
       options[:force_refresh] = "no" if options[:force_refresh] == false
 
-      path = node(node_id:node_id, full_dehydrate: options[:full_dehydrate],force_refresh: options[:force_refresh] )
+      path = node(node_id:        node_id,
+                  full_dehydrate: options[:full_dehydrate],
+                  force_refresh:  options[:force_refresh] )
 
       begin
         node = client.get(path)
@@ -75,12 +75,11 @@ module Synapse
       end
 
       node = Node.new(node_id: node['_id'],
-        user_id: self.user_id,
-        payload: node,
-        full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
-        type: node["type"]
-        )
-      node
+                      user_id: self.user_id,
+                      payload: node,
+                      full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
+                      type: node["type"]
+                      )
     end
 
     # Queries Synapse API for all nodes belonging to user
@@ -105,18 +104,16 @@ module Synapse
       end
 
 			return [] if nodes["nodes"].empty?
-			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'], user_id: node_data['user_id'], payload: node_data, full_dehydrate: "no", type: node_data["type"])}
-      nodes = Nodes.new(limit: nodes["limit"], page: nodes["page"], page_count: nodes["page_count"], nodes_count: nodes["node_count"], payload: response)
+			response = nodes["nodes"].map { |node_data| Node.new(node_id: node_data['_id'],
+                                                           user_id: node_data['user_id'],
+                                                           payload: node_data, full_dehydrate: "no",
+                                                           type: node_data["type"])}
+      nodes = Nodes.new(limit: nodes["limit"],
+                        page: nodes["page"],
+                        page_count: nodes["page_count"],
+                        nodes_count: nodes["node_count"],
+                        payload: response)
 		end
-
-		# Queries Synapse get user API for users refresh_token
-    # @see https://docs.synapsefi.com/docs/get-user
-    # @return refresh_token [String]
-		# def refresh_token()
-		# 	path = get_user_path(user_id: self.user_id)
-		# 	response = client.get(path)
-		# 	response["refresh_token"]
-		# end
 
 		# Quaries Synapse oauth API for uto authenitcate user
 		# @params scope [Array<Strings>] (optional)
@@ -148,9 +145,9 @@ module Synapse
     # @return API response [Hash]
     def select_2fa_device(device:, **options)
       payload = {
-        "refresh_token": self.refresh_token,
-        "phone_number": device
-      }
+                 "refresh_token": self.refresh_token,
+                 "phone_number": device
+                }
       path = oauth_path()
       device_response = client.post(path, payload, options)
       device_response
@@ -164,9 +161,9 @@ module Synapse
     # @return API response [Hash]
     def confirm_2fa_pin(pin:, **options)
       payload = {
-        "refresh_token": self.refresh_token,
-        "validation_pin": pin
-      }
+                "refresh_token": self.refresh_token,
+                "validation_pin": pin
+                }
 
       payload["scope"] = options[:scope] if options[:scope]
 
@@ -203,8 +200,15 @@ module Synapse
       end
 
 
-      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data)}
-      trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
+      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'],
+                                                                   payload:  trans_data
+                                                                   )}
+      trans = Transactions.new(limit:       trans["limit"],
+                               page:        trans["page"],
+                               page_count:  trans["page_count"],
+                               trans_count: trans["trans_count"],
+                               payload:     response
+                               )
 
     	trans
     end
@@ -227,12 +231,21 @@ module Synapse
       end
 
       if response["nodes"]
-        nodes = response["nodes"].map { |nodes_data| Node.new(user_id: self.user_id, node_id: nodes_data["_id"], full_dehydrate: false, payload: response, type: nodes_data["type"])}
-        nodes = Nodes.new(page: response["page"], limit: response["limit"], page_count: response["page_count"], nodes_count: response["node_count"], payload: nodes)
+        nodes = response["nodes"].map { |nodes_data| Node.new(user_id:        self.user_id,
+                                                              node_id:        nodes_data["_id"],
+                                                              full_dehydrate: false,
+                                                              payload:        response,
+                                                              type:           nodes_data["type"]
+                                                              )}
+        nodes = Nodes.new(page:        response["page"],
+                          limit:       response["limit"],
+                          page_count:  response["page_count"],
+                          nodes_count: response["node_count"],
+                          payload:     nodes
+                          )
       else
         access_token = response
       end
-
       access_token ? access_token : nodes
 		end
 
@@ -254,15 +267,23 @@ module Synapse
       end
 
       if response["nodes"]
-        nodes = response["nodes"].map { |nodes_data| Node.new(user_id: self.user_id, node_id: nodes_data["_id"], full_dehydrate: false, payload: response, type: nodes_data["type"])}
-        nodes = Nodes.new(page: response["page"], limit: response["limit"], page_count: response["page_count"], nodes_count: response["node_count"], payload: nodes)
+        nodes = response["nodes"].map { |nodes_data| Node.new(user_id:        self.user_id,
+                                                              node_id:        nodes_data["_id"],
+                                                              full_dehydrate: false,
+                                                              payload:        response,
+                                                              type:           nodes_data["type"]
+                                                              )}
+        nodes = Nodes.new(page:        response["page"],
+                          limit:       response["limit"],
+                          page_count:  response["page_count"],
+                          nodes_count: response["node_count"],
+                          payload:     nodes
+                          )
       else
         access_token = response
       end
-
       access_token ? access_token : nodes
     end
-
 
     # Allows you to upload an Ultimate Beneficial Ownership document
     # @param payload [Hash]
@@ -278,7 +299,6 @@ module Synapse
        self.authenticate()
        response = client.patch(path,payload)
       end
-
       response
     end
 
@@ -300,7 +320,6 @@ module Synapse
        self.authenticate()
        statements = client.get(path)
       end
-
       statements
     end
 
@@ -309,16 +328,18 @@ module Synapse
     # @param payload [Hash]
     # @return [Synapse::Node] or [Hash]
     def ship_card(node_id:, payload:)
-
       path = node(user_id: self.user_id, node_id: node_id) + "?ship=YES"
-
       begin
        response = client.patch(path,payload)
       rescue Synapse::Error::Unauthorized
        self.authenticate()
        response = client.patch(path,payload)
       end
-      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id:        self.user_id,
+               node_id:        response["_id"],
+               full_dehydrate: false,
+               payload:        response,
+               type:           response["type"])
     end
 
     # Resets debit card number, cvv, and expiration date
@@ -334,7 +355,12 @@ module Synapse
        self.authenticate()
        response = client.patch(path,payload)
       end
-      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id: self.user_id,
+               node_id:response["_id"],
+               full_dehydrate: false,
+               payload: response,
+               type: response["type"]
+               )
     end
 
     # Creates a new transaction in the API belonging to the provided node
@@ -351,7 +377,10 @@ module Synapse
        self.authenticate()
        transaction = client.post(path,payload, options)
       end
-      transaction = Transaction.new(trans_id: transaction['_id'], payload: transaction, node_id: node_id)
+      transaction = Transaction.new(trans_id: transaction['_id'],
+                                    payload:  transaction,
+                                    node_id:  node_id
+                                    )
     end
 
     # Queries the API for a transaction belonging to the supplied node by transaction id
@@ -367,8 +396,11 @@ module Synapse
         self.authenticate()
         trans = client.get(path)
       end
-      transaction = Transaction.new(trans_id: trans['_id'], payload: trans, node_id: node_id)
-      transaction
+      Transaction.new(trans_id: trans['_id'],
+                      payload:  trans,
+                      node_id:  node_id
+                     )
+
     end
 
 
@@ -400,9 +432,16 @@ module Synapse
       end
 
 
-      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'], payload: trans_data, node_id: node_id)}
-      trans = Transactions.new(limit: trans["limit"], page: trans["page"], page_count: trans["page_count"], trans_count: trans["trans_count"], payload: response)
-      trans
+      response = trans["trans"].map { |trans_data| Transaction.new(trans_id: trans_data['_id'],
+                                                                   payload:  trans_data,
+                                                                   node_id:  node_id
+                                                                   )}
+      Transactions.new(limit:       trans["limit"],
+                       page:        trans["page"],
+                       page_count:  trans["page_count"],
+                       trans_count: trans["trans_count"],
+                       payload:     response
+                       )
     end
 
     # Verifies microdeposits for a node
@@ -416,7 +455,12 @@ module Synapse
         self.authenticate()
         response = client.patch(path, payload)
       end
-      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id:        self.user_id,
+               node_id:        response["_id"],
+               full_dehydrate: false,
+               payload:        response,
+               type:           response["type"]
+               )
     end
 
     # Reinitiate microdeposits on a node
@@ -430,7 +474,11 @@ module Synapse
         self.authenticate()
         response = client.patch(path, payload)
       end
-      Node.new(user_id: self.user_id, node_id:response["_id"], full_dehydrate: false, payload: response, type: response["type"])
+      Node.new(user_id:        self.user_id,
+               node_id:        response["_id"],
+               full_dehydrate: false,
+               payload:        response,
+               type:           response["type"])
     end
 
     # Generate tokenized info for Apple Wallet
@@ -462,12 +510,12 @@ module Synapse
         self.authenticate()
         update = client.patch(path, payload)
       end
-      update = Node.new(node_id: node_id,
-                        user_id: self.user_id,
-                        payload: update,
-                        full_dehydrate: false,
-                        type: update["type"]
-                        )
+      Node.new(node_id:        node_id,
+               user_id:        self.user_id,
+               payload:        update,
+               full_dehydrate: false,
+               type:           update["type"]
+              )
     end
 
     def delete_node(node_id:)
@@ -487,9 +535,9 @@ module Synapse
     # @param is_credit [Boolean], for credit send true, for debit send false
     # @see https://docs.synapsefi.com/docs/trigger-dummy-transactions
     def dummy_transactions(node_id:, is_credit: nil)
-
       is_credit = "YES" if is_credit == true
       is_credit = "NO" if is_credit == false
+
       if is_credit
         path = node(user_id: self.user_id, node_id: node_id) + "/dummy-tran?#{is_credit}"
       else
@@ -511,7 +559,6 @@ module Synapse
     # @param payload [Hash]
     # @return [Synapse::Transaction]
     def comment_transaction(node_id:,trans_id:,payload:)
-
       path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
 
       begin
@@ -520,8 +567,7 @@ module Synapse
         self.authenticate()
         trans = client.patch(path, payload)
       end
-      transaction = Transaction.new(trans_id: trans['_id'], payload: trans)
-      transaction
+      Transaction.new(trans_id: trans['_id'], payload: trans)
     end
 
     # Cancels transaction if it has not already settled
@@ -529,7 +575,6 @@ module Synapse
     # @param trans_id
     # @return API response [Hash]
     def cancel_transaction(node_id:, trans_id:)
-
       path = trans_path(user_id: self.user_id, node_id: node_id) + "/#{trans_id}"
       begin
         response = client.delete(path)
@@ -572,10 +617,9 @@ module Synapse
        self.authenticate()
        subnet = client.post(path,payload, options)
       end
-      subnet = Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
-      subnet
-    end
 
+      Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
+    end
 
     # Gets all node subnets
     # @param node_id [String]
@@ -602,11 +646,17 @@ module Synapse
        subnets = client.get(path)
       end
 
-      response = subnets["subnets"].map { |subnets_data| Subnet.new(subnet_id: subnets_data['_id'], payload: subnets, node_id: node_id)}
-
-      subnets = Subnets.new(limit: subnets["limit"], page: subnets["page"], page_count: subnets["page_count"], subnets_count: subnets["subnets_count"], payload: response, node_id: node_id)
-
-      subnets
+      response = subnets["subnets"].map { |subnets_data| Subnet.new(subnet_id: subnets_data['_id'],
+                                                                    payload:   subnets,
+                                                                    node_id:   node_id
+                                                                    )}
+      Subnets.new(limit:         subnets["limit"],
+                  page:          subnets["page"],
+                  page_count:    subnets["page_count"],
+                  subnets_count: subnets["subnets_count"],
+                  payload:       response,
+                  node_id:       node_id
+                 )
     end
 
     # Queries a node for a specific subnet by subnet_id
