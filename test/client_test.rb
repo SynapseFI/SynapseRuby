@@ -1,13 +1,15 @@
 require 'minitest/autorun'
 require 'minitest/reporters'
-require '../lib/synapse_api'
+require '../lib/synapse_api/client'
 
 require 'dotenv'
-Dotenv.load
+Dotenv.load("../.env")
 
 
 class ClientTest < Minitest::Test
   def setup
+    # make sure to set up a .env file and add your own
+    #  client_id and client_secret values
     @options = {
       client_id:       ENV.fetch('TEST_CLIENT_ID'),
       client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
@@ -84,7 +86,18 @@ class ClientTest < Minitest::Test
   # added sleep() methods for all subscription test method to not trigger Synapse::Error::TooManyRequests
   def test_create_subscriptions
     client = Synapse::Client.new(@options)
-    response = client.create_subscriptions(scope: ["TRAN|PATCH"], url: "https://webhook.site/155f30bc-0c1a-42b9-b075-12c18fd242c5")
+    body = {
+      "scope": [
+        "USERS|POST",
+        "USER|PATCH",
+        "NODES|POST",
+        "NODE|PATCH",
+        "TRANS|POST",
+        "TRAN|PATCH"
+      ],
+      "url": "https://requestb.in/zp216zzp"
+    }
+    response = client.create_subscriptions(scope: body)
     assert_instance_of Synapse::Subscription, response
     sleep(5)
   end
