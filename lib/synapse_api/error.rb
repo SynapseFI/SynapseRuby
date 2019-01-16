@@ -16,27 +16,11 @@ module Synapse
     # Raised on the HTTP status code 402
     RequestDeclined = Class.new(ClientError)
 
-    # Raised on the HTTP status code 403
-    # Forbidden = Class.new(ClientError)
-    # '403' => Synapse::Error::Forbidden,
-
     # Raised on the HTTP status code 404
     NotFound = Class.new(ClientError)
 
-    # Raised on the HTTP status code 406
-    # NotAcceptable = Class.new(ClientError)
-    # '406' => Synapse::Error::NotAcceptable,
-
     # Raised on the HTTP status code 409
     Conflict = Class.new(ClientError)
-
-    # Raised on the HTTP status code 415
-    # UnsupportedMediaType = Class.new(ClientError)
-    # '415' => Synapse::Error::UnsupportedMediaType,
-
-    # Raised on the HTTP status code 422
-    # UnprocessableEntity = Class.new(ClientError)
-    # '422' => Synapse::Error::UnprocessableEntity,
 
     # Raised on the HTTP status code 429
     TooManyRequests = Class.new(ClientError)
@@ -47,21 +31,10 @@ module Synapse
     # Raised on the HTTP status code 500
     InternalServerError = Class.new(ServerError)
 
-    # Raised on the HTTP status code 502
-    # BadGateway = Class.new(ServerError)
-    # '502' => Synapse::Error::BadGateway,
-
     # Raised on the HTTP status code 503
     ServiceUnavailable = Class.new(ServerError)
 
-    # Raised on the HTTP status code 504
-    # GatewayTimeout = Class.new(ServerError)
-    # '504' => Synapse::Error::GatewayTimeout
-
     # HTTP status code to Error subclass mapping
-    #
-    # @todo doesn't do well when there's an html response from nginx for bad gateway/timeout
-
     ERRORS = {
       '202' => Synapse::Error::Accepted,
       '400' => Synapse::Error::BadRequest,
