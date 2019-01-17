@@ -136,8 +136,8 @@ class UserTest < Minitest::Test
       "nickname":"Test AC/RT"
     }
 
-    #subnet = user.create_subnet(node_id: node_id, payload: payload)
-    #assert_instance_of Synapse::Subnet, subnet
+    subnet = user.create_subnet(node_id: node_id, payload: payload)
+    assert_instance_of Synapse::Subnet, subnet
   end
 
   def test_get_all_subnets

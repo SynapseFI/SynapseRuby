@@ -41,12 +41,12 @@ module Synapse
        self.authenticate()
        response =client.patch(path, payload)
      end
-			user = User.new(user_id:        response['_id'],
-                      refresh_token:  response['refresh_token'],
-                      client:         client,
-                      full_dehydrate: false,
-                      payload:        response
-                     )
+		 User.new(user_id:        response['_id'],
+              refresh_token:  response['refresh_token'],
+              client:         client,
+              full_dehydrate: false,
+              payload:        response
+              )
 		end
 
     # Queries the API for a node belonging to user

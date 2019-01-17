@@ -15,8 +15,6 @@ class ErrorTest < Minitest::Test
 
   # request to get a user
   def test_200_response
-    client = Synapse::Client.new(@options)
-
     user_id = @user_id
     headers = {
         content_type: :json,
@@ -25,14 +23,13 @@ class ErrorTest < Minitest::Test
           'X-SP-USER'    => '|static_pin',
           'X-SP-USER-IP' => '127.0.0.1'
       }
-    details = RestClient.get("https://uat-api.synapsefi.com/v3.1/users/#{@user_id}", headers)
+    details = RestClient.get("https://uat-api.synapsefi.com/v3.1/users/#{user_id}", headers)
     #print details.code
     assert_equal 200, details.code
   end
 
   # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match
   def test_400_response
-    client = Synapse::Client.new(@options)
     user_id = @user_id
     headers = {
         content_type: :json,
@@ -43,7 +40,7 @@ class ErrorTest < Minitest::Test
       }
 
     begin
-       RestClient.get("https://api.synapsefi.com/v3.1/users/#{@user_id}", headers)
+       RestClient.get("https://api.synapsefi.com/v3.1/users/#{user_id}", headers)
     rescue => e
       details = e.response
       details = JSON.parse(details)
@@ -58,8 +55,6 @@ class ErrorTest < Minitest::Test
 
   # getting a users transaction without oauthkey
   def test_401_response
-    client = Synapse::Client.new(@options)
-
     user = @user_id
     headers = {
         content_type: :json,
