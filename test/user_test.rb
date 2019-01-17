@@ -11,6 +11,7 @@ class UserTest < Minitest::Test
       development_mode: true,
       base_url: 'https://uat-api.synapsefi.com/v3.1'
     }
+    # please make sure to change constant with your own user_id
     @user_id ="5bd9e16314c7fa00a3076960"
   end
 
