@@ -35,6 +35,7 @@ For minor issues, please open a pull request. For larger changes or features, pl
 ## Running the Test Suite
 
 If you haven't already, set the `TEST_CLIENT_ID` and `TEST_CLIENT_SECRET` environment variables in `.env` file .
+Please read and update user_test.rb and error_test.rb files with your user own user_id
 
 To run all tests, execute:
 
