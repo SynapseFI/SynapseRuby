@@ -38,7 +38,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.10)
+  bundler
   dotenv (~> 2.1.1)
   minitest (~> 5.8.2)
   minitest-reporters (~> 1.1.5)
