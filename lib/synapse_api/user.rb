@@ -400,7 +400,6 @@ module Synapse
                       payload:  trans,
                       node_id:  node_id
                      )
-
     end
 
 
@@ -494,6 +493,33 @@ module Synapse
         response = client.patch(path, payload)
       end
       response
+    end
+
+    # Queries the API for user node
+    # @param node_id [String]
+    # @see https://docs.synapsefi.com/docs/view-account
+    def get_node(node_id:, **options)
+
+      options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
+      options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
+
+      options[:force_refresh] = "yes" if options[:force_refresh] == true
+      options[:force_refresh] = "no" if options[:force_refresh] == false
+
+      path = node(node_id: node_id, full_dehydrate: options[:full_dehydrate], force_refresh: options[:force_refresh] )
+
+      begin
+        node = client.get(path)
+      rescue Synapse::Error::Unauthorized
+        self.authenticate()
+        node = client.get(path)
+      end
+      Node.new(node_id:        node_id,
+               user_id:        self.user_id,
+               payload:        node,
+               full_dehydrate: options[:full_dehydrate] == "yes" ? true : false,
+               type:           node["type"]
+              )
     end
 
     # Update supp_id, nickname, etc. for a node
@@ -764,9 +790,6 @@ module Synapse
     end
 	end
 end
-
-
-
 
 
 
