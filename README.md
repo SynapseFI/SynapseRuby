@@ -1,4 +1,4 @@
-# SynapseFI-Ruby-v2
+# SynapseRuby
 
 Native API library for SynapseFI REST v3.x
 
