@@ -243,7 +243,7 @@ module Synapse
     # @return [Hash]
     def webhook_logs()
       path = subscriptions_path + "/logs"
-      respone = client.get(path)
+      client.get(path)
     end
 
   	# Issues public key for client
