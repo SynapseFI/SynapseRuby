@@ -11,6 +11,8 @@ class ClientTest < Minitest::Test
       fingerprint:      'static_pin',
       development_mode: true
     }
+    # please make sure to change constant with your own values
+    @subscription = "5beb6f2fbddf603229fe4ec5"
   end
 
   # Testing HTTP_REQUEST @congfig through client class
@@ -105,7 +107,8 @@ class ClientTest < Minitest::Test
 
   def test_get_subscription
     client = Synapse::Client.new(@options)
-    response = client.get_subscription(subscription_id: "5beb6f2fbddf603229fe4ec5")
+    subscription = @subscription
+    response = client.get_subscription(subscription_id: subscription)
     assert_instance_of Synapse::Subscription, response
     sleep(5)
   end

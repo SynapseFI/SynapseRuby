@@ -1,7 +1,6 @@
 require 'rest-client'
 require 'open-uri'
 require 'json'
-require_relative './error'
 
 module Synapse
 	# Wrapper for HTTP requests using RestClient.

@@ -9,19 +9,27 @@ class ErrorTest < Minitest::Test
       fingerprint:      'static_pin',
       development_mode: true
     }
-    # please make sure to change constant with your own user_id
+    # please make sure to change constant with your own values
     @user_id = "5bea4453321f48299bac84e8"
+    @client_id = ENV.fetch('TEST_CLIENT_ID')
+    @client_secret = ENV.fetch('TEST_CLIENT_SECRET')
+    @fingerprint = '|static_pin'
+    @ip = '127.0.0.1'
   end
 
   # request to get a user
   def test_200_response
     user_id = @user_id
+    client_id = @client_id
+    client_secret = @client_secret
+    fingerprint = @fingerprint
+    ip = @ip
     headers = {
         content_type: :json,
         accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => '|static_pin',
-          'X-SP-USER-IP' => '127.0.0.1'
+        'X-SP-GATEWAY' => "#{client_id}|#{client_secret}",
+          'X-SP-USER'    => "#{fingerprint}",
+          'X-SP-USER-IP' => "#{ip}"
       }
     details = RestClient.get("https://uat-api.synapsefi.com/v3.1/users/#{user_id}", headers)
     #print details.code
@@ -31,12 +39,16 @@ class ErrorTest < Minitest::Test
   # sending an api call to the wrong baseurl (production); cleint_id & client_secret doesnt match
   def test_400_response
     user_id = @user_id
+    client_id = @client_id
+    client_secret = @client_secret
+    fingerprint = @fingerprint
+    ip = @ip
     headers = {
         content_type: :json,
         accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => '|static_pin',
-          'X-SP-USER-IP' => '127.0.0.1'
+        'X-SP-GATEWAY' => "#{client_id}|#{client_secret}",
+          'X-SP-USER'    => "#{fingerprint}",
+          'X-SP-USER-IP' => "#{ip}"
       }
 
     begin
@@ -56,12 +68,16 @@ class ErrorTest < Minitest::Test
   # getting a users transaction without oauthkey
   def test_401_response
     user = @user_id
+    client_id = @client_id
+    client_secret = @client_secret
+    fingerprint = @fingerprint
+    ip = @ip
     headers = {
         content_type: :json,
         accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => '|static_pin',
-          'X-SP-USER-IP' => '127.0.0.1'
+        'X-SP-GATEWAY' => "#{client_id}|#{client_secret}",
+          'X-SP-USER'    => "#{fingerprint}",
+          'X-SP-USER-IP' => "#{ip}"
       }
 
     begin
@@ -103,6 +119,10 @@ class ErrorTest < Minitest::Test
   def test_404_response
     client = Synapse::Client.new(@options)
     user_id = @user_id
+    client_id = @client_id
+    client_secret = @client_secret
+    fingerprint = @fingerprint
+    ip = @ip
     user = client.get_user(user_id:user_id)
     user.authenticate
     oauth_key = user.oauth_key
@@ -120,9 +140,9 @@ class ErrorTest < Minitest::Test
     headers = {
         content_type: :json,
         accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => "#{oauth_key}|static_pin",
-          'X-SP-USER-IP' => '127.0.0.1'
+        'X-SP-GATEWAY' => "#{client_id}|#{client_secret}",
+          'X-SP-USER'    => "#{oauth_key}|#{fingerprint}",
+          'X-SP-USER-IP' => "#{ip}"
       }
     begin
        RestClient::Request.execute(:method =>  :patch,
@@ -147,6 +167,10 @@ class ErrorTest < Minitest::Test
   def test_409_response
     client = Synapse::Client.new(@options)
     user_id = @user_id
+    client_id = @client_id
+    client_secret = @client_secret
+    fingerprint = @fingerprint
+    ip = @ip
     user = client.get_user(user_id:user_id)
     user.authenticate
     oauth_key = user.oauth_key
@@ -154,9 +178,9 @@ class ErrorTest < Minitest::Test
     headers = {
         content_type: :json,
         accept: :json,
-        'X-SP-GATEWAY' => 'client_id_IvSkbeOZAJlmM4ay81EQC0oD7WnP6X9UtRhKs5Yz|client_secret_1QFnWfLBi02r5yAKhovw8Rq9MNPgCkZE4ulHxdT0',
-          'X-SP-USER'    => "#{oauth_key}|static_pin",
-          'X-SP-USER-IP' => '127.0.0.1'
+        'X-SP-GATEWAY' => "#{client_id}|#{client_secret}",
+          'X-SP-USER'    => "#{oauth_key}|#{fingerprint}",
+          'X-SP-USER-IP' => "#{ip}"
       }
 
     payload = {

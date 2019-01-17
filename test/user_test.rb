@@ -11,8 +11,16 @@ class UserTest < Minitest::Test
       development_mode: true,
       base_url: 'https://uat-api.synapsefi.com/v3.1'
     }
-    # please make sure to change constant with your own user_id
+    # please make sure to change constant with your own values
     @user_id ="5bd9e16314c7fa00a3076960"
+    @card = "5bd9ebfe389f2400afb03a97"
+    @card_trans_id = "5c40c3e2f41098006603eb3c"
+    @card_fee_node = "5bd9e7b3389f2400adb012ae"
+    @deposit = "5bd9f755389f2400b9b0a25f"
+    @deposit_trans_id = "5c2d317d775f10008bb753ca"
+    @deposit_subnet_id = "5c002eb460128b001f217787"
+    @synapse_account = "55b3f8c686c2732b4c4e9df6"
+
   end
 
   def test_user_update
@@ -56,8 +64,9 @@ class UserTest < Minitest::Test
   def test_get_user_node
     client = Synapse::Client.new(@options)
     user = @user_id
+    node = @card
     user = client.get_user(user_id: user)
-    node = user.get_user_node(node_id: "5bfed4e8bab475008ea4e390", full_dehydrate: true)
+    node = user.get_user_node(node_id: node, full_dehydrate: true)
 
     assert_equal true, node.full_dehydrate
   end
@@ -76,11 +85,12 @@ class UserTest < Minitest::Test
     user = @user_id
     user = client.get_user(user_id: user)
 
-    node_id = "5bd9ebfe389f2400afb03a97"
+    node_id = @card
+    account = @synapse_account
     payload = {
       "to": {
         "type": "SYNAPSE-US",
-        "id": "55b3f8c686c2732b4c4e9df6"
+        "id": account
       },
       "amount": {
         "amount": 20.1,
@@ -99,8 +109,8 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bfed4e8bab475008ea4e390"
-    trans_id = "5c002ab7c9ab5b00ea5a8abd"
+    node_id = @card
+    trans_id = @card_trans_id
 
     transaction = user.get_node_transaction(node_id: node_id, trans_id: trans_id)
 
@@ -111,7 +121,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
+    node_id = @deposit
 
     transactions = user.get_all_node_transaction(node_id: node_id)
 
@@ -122,7 +132,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
+    node_id = @card
     transaction = user.dummy_transactions(node_id: node_id, is_credit: true)
     assert_equal transaction["success"], true
   end
@@ -131,7 +141,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9ebfe389f2400afb03a97"
+    node_id = @deposit
     payload = {
       "nickname":"Test AC/RT"
     }
@@ -144,7 +154,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
+    node_id = @deposit
     subnets = user.get_all_subnets(node_id: node_id)
     assert_instance_of Synapse::Subnets, subnets
   end
@@ -153,8 +163,8 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
-    subnet_id = "5c002eb460128b001f217787"
+    node_id = @deposit
+    subnet_id = @deposit_subnet_id
 
     subnets = user.get_subnet(node_id: node_id, subnet_id: subnet_id)
     assert_instance_of Synapse::Subnet, subnets
@@ -164,7 +174,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
+    node_id = @deposit
 
 
     statements = user.get_node_statements(node_id: node_id)
@@ -175,8 +185,8 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
-    trans_id = "5c087d9699c81e5b3328e860"
+    node_id = @deposit
+    trans_id = @deposit_trans_id
 
     payload = {
       "comment": "It Settled!"
@@ -190,7 +200,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bd9f755389f2400b9b0a25f"
+    node_id = @deposit
     payload = {
       "nickname": "Savings"
     }
@@ -204,10 +214,11 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bfed4e8bab475008ea4e390"
+    node_id = @card
+    fee_node = @card_fee_node
     payload = {
-      "fee_node_id":"5bd9e7b3389f2400adb012ae",
-      "expedite":false
+      "fee_node_id": fee_node,
+      "expedite": false
     }
 
     ship = user.ship_card(node_id: node_id, payload: payload)
@@ -219,7 +230,7 @@ class UserTest < Minitest::Test
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
-    node_id = "5bfed4e8bab475008ea4e390"
+    node_id = @card
 
 
     reset = user.reset_debit_card(node_id: node_id)
