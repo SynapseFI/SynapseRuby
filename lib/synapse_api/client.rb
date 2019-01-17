@@ -1,4 +1,3 @@
-require 'json'
 require_relative './http_request'
 require_relative './user'
 require_relative './users'
@@ -11,8 +10,6 @@ require_relative './subscriptions'
 require_relative './subnet'
 require_relative './subnets'
 require 'pp'
-
-
 
 module Synapse
 	# Initializes various wrapper settings such as development mode and request

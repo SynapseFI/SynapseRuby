@@ -1,6 +1,10 @@
+File.expand_path('../lib', __FILE__)
 require 'minitest/autorun'
 require 'minitest/reporters'
-require './lib/synapse_api/client'
+require 'synapse_fi'
 
+# load environment variables
 require'dotenv'
 Dotenv.load
+
+Minitest::Reporters.use!([Minitest::Reporters::SpecReporter.new])
