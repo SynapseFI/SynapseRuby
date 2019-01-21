@@ -9,7 +9,7 @@ Not all API endpoints are supported.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'synapse_fi'
+gem 'synapseruby'
 ```
 
 And then execute:
@@ -21,7 +21,7 @@ $ bundle
 Or install it yourself by executing:
 
 ```bash
-$ gem install synapse_fi
+$ gem install synapseruby
 ```
 ## Documentation
 

@@ -4,7 +4,7 @@ require 'date'
 require 'synapse_api/version'
 
 Gem::Specification.new do |s|
-  s.name     = 'synapse_fi'
+  s.name     = 'synapseruby'
   s.version  = Synapse::VERSION
   s.date     = Date.today.to_s
   s.author  = ['Emmanuel Mawutor']
