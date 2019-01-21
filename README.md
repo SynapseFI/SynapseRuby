@@ -26,7 +26,7 @@ $ gem install synapseruby
 ## Documentation
 
 - [API docs](http://docs.synapsefi.com/v3.1)
-- [synapse_fi gem docs](https://www.rubydoc.info/gems/synapse_fi)
+- [synapse_fi gem docs](https://rubygems.org/gems/synapseruby)
 - [Samples demonstrating common operations](samples.md)
 
 ## Contributing
