@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.author  = ['Emmanuel Mawutor']
   s.email    = 'help@synapsepay.com'
   s.summary  = 'SynapseFI v3 Rest Native API Library'
-  s.homepage = 'https://rubygems.org/gems/synapse_fi'
+  s.homepage = 'https://rubygems.org/gems/synapseruby'
   s.license  = 'MIT'
 
   s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
