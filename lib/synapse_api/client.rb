@@ -356,4 +356,3 @@ module Synapse
     end
   end
 end
-
