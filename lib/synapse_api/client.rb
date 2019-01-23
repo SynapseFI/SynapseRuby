@@ -1,15 +1,4 @@
-require_relative './http_request'
-require_relative './user'
-require_relative './users'
-require_relative './transaction'
-require_relative './transactions'
-require_relative './node'
-require_relative './nodes'
-require_relative './subscription'
-require_relative './subscriptions'
-require_relative './subnet'
-require_relative './subnets'
-require 'pp'
+require 'synapse_fi'
 
 module Synapse
 	# Initializes various wrapper settings such as development mode and request

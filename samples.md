@@ -405,7 +405,7 @@ user.create_subnet(node_id: node_id, payload: body)
 ```bash
 node_id = '594e606212e17a002f2e3251'
 subnet_id = '59c9f77cd412960028b99d2b'
-subnet = user.get_subnet(node_id:, subnet_id:)
+subnet = user.get_subnet(node_id: node_id, subnet_id: subnet_id)
 ```
 
 #### Update Subnet
