@@ -20,6 +20,8 @@ class UserTest < Minitest::Test
     @deposit_trans_id = "5c2d317d775f10008bb753ca"
     @deposit_subnet_id = "5c002eb460128b001f217787"
     @synapse_account = "55b3f8c686c2732b4c4e9df6"
+    @subnet_card = "5c48a39c8718830cdd83a64e"
+    @subnet_id = "5c48a3d60421cd002947b5ab"
 
   end
 
@@ -210,7 +212,26 @@ class UserTest < Minitest::Test
     assert_equal node_id,  node.node_id
   end
 
-  def test_ship_card
+  def test_update_subnet
+    client = Synapse::Client.new(@options)
+    user = @user_id
+    user = client.get_user(user_id: user)
+    node_id = @subnet_card
+    subnet_id = @subnet_id
+    body = {
+      "preferences": {
+        "allow_foreign_transactions":true,
+        "daily_atm_withdrawal_limit":100,
+        "daily_transaction_limit":900
+      }
+    }
+
+    subnet = user.update_subnet(node_id: node_id, payload: body, subnet_id: subnet_id )
+
+    assert_equal node_id,  subnet.node_id
+  end
+
+  def test_ship_card_node
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
@@ -221,19 +242,19 @@ class UserTest < Minitest::Test
       "expedite": false
     }
 
-    ship = user.ship_card(node_id: node_id, payload: payload)
+    ship = user.ship_card_node(node_id: node_id, payload: payload)
 
     assert_equal node_id,  ship.node_id
   end
 
-  def test_reset_debit_card
+  def test_reset_card_node
     client = Synapse::Client.new(@options)
     user = @user_id
     user = client.get_user(user_id: user)
     node_id = @card
 
 
-    reset = user.reset_debit_card(node_id: node_id)
+    reset = user.reset_card_node(node_id: node_id)
 
     assert_equal node_id,  reset.node_id
   end

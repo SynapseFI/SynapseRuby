@@ -32,6 +32,7 @@
     + [Subnets](#subnets)
         * [Create Subnet](#create-subnet)
         * [Get Subnet](#get-subnet)
+        * [Update Subnet](#update-subnet)
     + [Transactions](#transactions)
         * [Create Transaction](#create-transaction)
         * [Get Transaction](#get-transaction)
@@ -328,14 +329,14 @@ body = {
   "fee_node_id":"5ba05e7920b3aa006482c5ad",
   "expedite":True
 }
-node = user.ship_card(node_id: node_id, payload: body)
+node = user.ship_card_node(node_id: node_id, payload: body)
 ```
 
 #### Reset Debit Cards
 
 ```bash
 node_id = '5ba05ed620b3aa005882c52a'
-node = user.reset_debit_card(node_id: node_id)
+node = user.reset_card_node(node_id: node_id)
 ```
 
 #### Verify Micro Deposit
@@ -403,8 +404,22 @@ user.create_subnet(node_id: node_id, payload: body)
 #### Get Subnet
 ```bash
 node_id = '594e606212e17a002f2e3251'
-subn_id = '59c9f77cd412960028b99d2b'
+subnet_id = '59c9f77cd412960028b99d2b'
 subnet = user.get_subnet(node_id:, subnet_id:)
+```
+
+#### Update Subnet
+```bash
+node_id = '594e606212e17a002f2e3251'
+subnet_id = '59c9f77cd412960028b99d2b'
+body = {
+  "preferences": {
+    "allow_foreign_transactions":true,
+    "daily_atm_withdrawal_limit":100,
+    "daily_transaction_limit":900
+  }
+}
+subnet = user.update_subnet(node_id: node_id, payload: body, subnet_id: subnet_id)
 ```
 
 ### Transactions

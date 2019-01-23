@@ -323,12 +323,15 @@ module Synapse
       statements
     end
 
-    # Request to ship a user card
+    # Request to ship CARD-US
+    # @note Deprecated
     # @param node_id [String]
     # @param payload [Hash]
     # @return [Synapse::Node] or [Hash]
-    def ship_card(node_id:, payload:)
+    def ship_card_node(node_id:, payload:)
+
       path = node(user_id: self.user_id, node_id: node_id) + "?ship=YES"
+
       begin
        response = client.patch(path,payload)
       rescue Synapse::Error::Unauthorized
@@ -342,11 +345,31 @@ module Synapse
                type:           response["type"])
     end
 
+    # Request to ship user debit card [Subnet]
+    # @param node_id [String]
+    # @param payload [Hash]
+    # @param subnet_id [String]
+    # @return [Synapse::Node] or [Hash]
+    def ship_card(node_id:, payload:, subnet_id:)
+
+      path = node(user_id: self.user_id, node_id: node_id) + "/subnets/#{subnet_id}/ship"
+
+      begin
+       response = client.patch(path,payload)
+      rescue Synapse::Error::Unauthorized
+       self.authenticate()
+       response = client.patch(path,payload)
+      end
+      Subnet.new(subnet_id: response["subnet_id"], payload: response, node_id: response["node_id"])
+
+    end
+
     # Resets debit card number, cvv, and expiration date
+    # @note Deprecated
     # @see https://docs.synapsefi.com/docs/reset-debit-card
     # @param node_id [String]
     # @return [Synapse::Node] or [Hash]
-    def reset_debit_card(node_id:)
+    def reset_card_node(node_id:)
       path = node(user_id: self.user_id, node_id: node_id)  + "?reset=YES"
       payload = {}
       begin
@@ -602,7 +625,7 @@ module Synapse
       dispute
     end
 
-    # Creates subnet for a node
+    # Creates subnet for a node debit card or act/rt number
     # @param node_id [String]
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
@@ -619,6 +642,24 @@ module Synapse
 
       Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
     end
+
+    # Updates subnet debit card and act/rt number
+    # @param node_id [String]
+    # @param payload [Hash]
+    # @param subnet_id [String]
+    # @return [Synapse::Subnet]
+    def update_subnet(node_id:, payload:, subnet_id:, **options)
+      path = subnet_path(user_id: self.user_id, node_id: node_id, subnet_id: subnet_id)
+
+      begin
+       subnet = client.patch(path,payload)
+      rescue Synapse::Error::Unauthorized
+       self.authenticate()
+       subnet = client.patch(path,payload)
+      end
+      Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
+    end
+
 
     # Gets all node subnets
     # @param node_id [String]
@@ -757,8 +798,12 @@ module Synapse
       path
     end
 
-    def subnet_path(user_id:, node_id:)
-      path = "/users/#{user_id}/nodes/#{node_id}/subnets"
+    def subnet_path(user_id:, node_id:, subnet_id: nil)
+      if subnet_id
+        path = "/users/#{user_id}/nodes/#{node_id}/subnets/#{subnet_id}"
+      else
+        path = "/users/#{user_id}/nodes/#{node_id}/subnets"
+      end
       path
     end
 	end

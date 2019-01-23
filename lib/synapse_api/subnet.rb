@@ -2,7 +2,7 @@ module Synapse
 
   class Subnet
 
-    attr_accessor  :subnet_id, :payload
+    attr_accessor  :subnet_id, :payload, :node_id
 
     def initialize(subnet_id:, payload:, node_id:)
       @subnet_id = subnet_id
@@ -11,3 +11,5 @@ module Synapse
     end
   end
 end
+
+
