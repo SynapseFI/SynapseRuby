@@ -1,4 +1,6 @@
 # SynapseRuby
+![Gem](https://img.shields.io/gem/v/synapseruby.svg)
+![status](https://img.shields.io/badge/status-beta-yellow.svg)
 
 Native API library for SynapseFI REST v3.x
 
