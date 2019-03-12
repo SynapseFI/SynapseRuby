@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    synapse_fi (0.0.3)
+    synapseruby (1.0.4)
       rest-client (~> 2.0)
 
 GEM
@@ -38,12 +38,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
+  bundler (~> 1.10)
   dotenv (~> 2.1.1)
   minitest (~> 5.8.2)
   minitest-reporters (~> 1.1.5)
   rake (~> 10.0)
-  synapse_fi!
+  synapseruby!
 
 BUNDLED WITH
    1.17.1
