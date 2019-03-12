@@ -75,6 +75,10 @@ client  = Synapse::Client.new(args)
 - Returns user instance
 
 ```bash
+ip_address = "127.0.0"
+fingerprint = "234092485wsf"
+idemopotency_key = "222222"
+
 payload = {
   "logins": [
     {
@@ -95,7 +99,7 @@ payload = {
   }
 }
 
-user = client.create_user(payload: payload)
+user = client.create_user(payload: payload, ip_address: ip_address, fingerprint: fingerprint, idemopotency_key: idemopotency_key)
 ```
 
 ##### Get User
@@ -103,7 +107,10 @@ user = client.create_user(payload: payload)
 
 ```bash
 user_id = "1232"
-user = client.get_user(user_id: user_id,full_dehydrate: true)
+fingerprint = "234092485wsf"
+ip_address = "127.0.0"
+
+user = client.get_user(user_id: user_id, ip_address: ip_address, fingerprint: fingerprint, full_dehydrate: true)
 ```
 
 ##### Create Subscription
