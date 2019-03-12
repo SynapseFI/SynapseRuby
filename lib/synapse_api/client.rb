@@ -1,5 +1,6 @@
 require 'synapse_fi'
 
+
 module Synapse
 	# Initializes various wrapper settings such as development mode and request
  	# header values
@@ -44,9 +45,14 @@ module Synapse
     # Queries Synapse API to create a new user
     # @param payload [Hash]
     # @param idempotency_key [String] (optional)
+    # @param ip_address [String] (optional)
+    # @param fingerprint [String] (optional)
     # @return [Synapse::User]
     # @see https://docs.synapsepay.com/docs/create-a-user payload structure
-    def create_user(payload:, **options)
+    def create_user(payload:, ip_address:, **options)
+
+      client.update_headers(ip_address: ip_address, fingerprint: options[:fingerprint])
+
       response = client.post(user_path,payload, options)
 
       User.new(user_id:           response['_id'],
@@ -69,6 +75,8 @@ module Synapse
   	# Queries Synapse API for a user by user_id
   	# @param user_id [String] id of the user to find
     # @param full_dehydrate [String] (optional) if true, returns all KYC on user
+    # @param ip_address [String] (optional)
+    # @param fingerprint [String] (optional)
     # @see https://docs.synapsefi.com/docs/get-user
     # @return [Synapse::User]
   	def get_user(user_id:, **options)
@@ -77,6 +85,8 @@ module Synapse
 
   		options[:full_dehydrate] = "yes" if options[:full_dehydrate] == true
   		options[:full_dehydrate] = "no" if options[:full_dehydrate] == false
+
+      client.update_headers(ip_address: options[:ip_address], fingerprint: options[:fingerprint])
 
   		path = user_path(user_id: user_id, full_dehydrate: options[:full_dehydrate])
   		response = client.get(path)
@@ -345,3 +355,6 @@ module Synapse
     end
   end
 end
+
+
+
