@@ -57,7 +57,7 @@ class ClientTest < Minitest::Test
         "Andrew J"
       ]
     }
-    @response = client.create_user(payload: payload)
+    @response = client.create_user(payload: payload, ip_address: "127.0.0.1")
     assert_instance_of Synapse::User, @response
   end
 
@@ -141,11 +141,11 @@ class ClientTest < Minitest::Test
       }
     }
     # fails if the block outputs anything to stderr stdout
-    assert_silent { client.create_user(payload: payload) }
+    assert_silent { client.create_user(payload: payload, ip_address: "127.0.0.1") }
 
     @options[:logging] = true
     # failse if stdout does not output the expected results
-    assert_output { client.create_user(payload: payload) }
+    assert_output { client.create_user(payload: payload, ip_address: "127.0.0.1") }
   end
 
   def test_issue_public_key

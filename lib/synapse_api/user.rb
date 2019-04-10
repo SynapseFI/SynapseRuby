@@ -1,18 +1,10 @@
-require_relative './http_request'
-require 'open-uri'
-require 'json'
-require_relative './error'
-require_relative './node'
-require_relative './nodes'
-require_relative './transaction'
-require_relative './transactions'
-
 module Synapse
   # Wrapper class for /users endpoints
 	class User
 
 		# Valid optional args for #get
-    VALID_QUERY_PARAMS = [:query, :page, :per_page, :type, :full_dehydrate, :ship, :force_refresh].freeze
+    VALID_QUERY_PARAMS = [:query, :page, :per_page, :type, :full_dehydrate, :ship, :force_refresh, :is_credit,
+                          :subnetid, :foreign_transaction,].freeze
 
 		attr_accessor :client, :user_id,:refresh_token, :oauth_key, :expires_in, :payload, :full_dehydrate
 
@@ -554,18 +546,21 @@ module Synapse
 
     # Initiates dummy transactions to a node
     # @param node_id [String]
-    # @param is_credit [Boolean], for credit send true, for debit send false
+    # @param is_credit [String]
+    # @param foreign_transaction [String]
+    # @param subnetid [String]
+    # @param type [String]
     # @see https://docs.synapsefi.com/docs/trigger-dummy-transactions
-    def dummy_transactions(node_id:, is_credit: nil)
-      is_credit = "YES" if is_credit == true
-      is_credit = "NO" if is_credit == false
+    def dummy_transactions(node_id:, **options)
 
-      if is_credit
-        path = node(user_id: self.user_id, node_id: node_id) + "/dummy-tran?#{is_credit}"
-      else
-        path = node(user_id: self.user_id, node_id: node_id) + "/dummy-tran"
-      end
+      path = node(user_id: self.user_id, node_id: node_id) + "/dummy-tran"
 
+
+      params = VALID_QUERY_PARAMS.map do |p|
+        options[p] ? "#{p}=#{options[p]}" : nil
+      end.compact
+      path += '?' + params.join('&') if params.any?
+      print(path)
       begin
        response = client.get(path)
       rescue Synapse::Error::Unauthorized

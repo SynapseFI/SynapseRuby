@@ -135,7 +135,7 @@ class UserTest < Minitest::Test
     user = @user_id
     user = client.get_user(user_id: user)
     node_id = @card
-    transaction = user.dummy_transactions(node_id: node_id, is_credit: true)
+    transaction = user.dummy_transactions(node_id: node_id, is_credit: "YES")
     assert_equal transaction["success"], true
   end
 
