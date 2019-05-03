@@ -91,7 +91,7 @@ class ErrorTest < Minitest::Test
     assert_instance_of Synapse::Error::Unauthorized, error
 
     assert_equal "401", details["http_code"]
-    assert_equal "110", details["error_code"]
+    assert_equal "300", details["error_code"]
   end
 
   # checks Synapse::Error to make sure class matches response to the right Error object
