@@ -1,9 +1,10 @@
 # updating gem version
 #  git add and commit changes
+#  gem build
 #  gem push pkg/<pkg name>
 module Synapse
   # Gem version
-  VERSION = '1.0.7'.freeze
+  VERSION = '1.0.8'.freeze
 end
 
 
