@@ -315,8 +315,15 @@ module Synapse
             market_data
         end
 
-        def routing_number(payload:)
+        def routing_number_verification(payload:)
             path = '/routing-number-verification'
+
+            response = client.post(path,payload)
+            response
+        end
+
+        def address_verification(payload:)
+            path = '/address-verification'
 
             response = client.post(path,payload)
             response
