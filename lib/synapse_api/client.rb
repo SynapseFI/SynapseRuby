@@ -315,6 +315,9 @@ module Synapse
             market_data
         end
 
+        # Queries Synapse API for Routing Verification
+        # @param payload [Hash]
+        # @return API response [Hash]
         def routing_number_verification(payload:)
             path = '/routing-number-verification'
 
@@ -322,6 +325,9 @@ module Synapse
             response
         end
 
+        # Queries Synapse API for Address Verification
+        # @param payload [Hash]
+        # @return API response [Hash]
         def address_verification(payload:)
             path = '/address-verification'
 
