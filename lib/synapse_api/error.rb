@@ -34,6 +34,9 @@ module Synapse
     # Raised on the HTTP status code 503
     ServiceUnavailable = Class.new(ServerError)
 
+    # Raised on unexpected HTTP status codes
+    Unknown = Class.new(self)
+
     # HTTP status code to Error subclass mapping
     ERRORS = {
       '202' => Synapse::Error::Accepted,
@@ -65,7 +68,7 @@ module Synapse
       def from_response(body)
         message, error_code, http_code = parse_error(body)
         http_code = http_code.to_s
-        klass = ERRORS[http_code] || Synapse::Error
+        klass = ERRORS[http_code] || Synapse::Error::Unknown
         klass.new(message: message, code: error_code, response: body, http_code: http_code)
       end
 
