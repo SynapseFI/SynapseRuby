@@ -282,7 +282,7 @@ module Synapse
         # @return API response
         def create_ubo(payload:)
             path = get_user_path(user_id: self.user_id)
-            path = path + nodes_path + "/ubo"
+            path = path + "/ubo"
 
             begin
                 response = client.patch(path,payload)
