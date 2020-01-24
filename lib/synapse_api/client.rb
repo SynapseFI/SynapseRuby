@@ -234,9 +234,18 @@ module Synapse
         end
 
         # Returns all of the webhooks belonging to client
+        # @param page [Integer] (Optional)
+        # @param per_page [Integer] (Optional)
         # @return [Hash]
-        def webhook_logs()
+        def webhook_logs(**options)
             path = subscriptions_path + "/logs"
+
+            params = VALID_QUERY_PARAMS.map do |p|
+                options[p] ? "#{p}=#{options[p]}" : nil
+            end.compact
+
+            path += '?' + params.join('&') if params.any?
+
             client.get(path)
         end
 
