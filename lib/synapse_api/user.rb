@@ -729,7 +729,7 @@ module Synapse
         # @param payload [Hash]
         # @see https://docs.synapsefi.com/reference#generate-node-statements
         # @return API response [Hash]
-        def get_node_statements(node_id:,payload:)
+        def generate_node_statements(node_id:,payload:)
 
             path = node(user_id: self.user_id, node_id: node_id) + "/statements"
 
