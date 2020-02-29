@@ -25,7 +25,7 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     netrc (0.11.0)
-    rake (10.5.0)
+    rake (12.3.3)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -45,7 +45,7 @@ DEPENDENCIES
   dotenv (~> 2.1.1)
   minitest (~> 5.8.2)
   minitest-reporters (~> 1.1.5)
-  rake (~> 10.0)
+  rake (~> 12.3)
   rubygems-update
   synapseruby!
 
