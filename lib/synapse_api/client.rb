@@ -251,11 +251,16 @@ module Synapse
 
       	# Issues public key for client
       	# @param scope [String]
+        # @param user_id [String] (Optional)
         # @see https://docs.synapsefi.com/docs/issuing-public-key
       	# @note valid scope "OAUTH|POST,USERS|POST,USERS|GET,USER|GET,USER|PATCH,SUBSCRIPTIONS|GET,SUBSCRIPTIONS|POST,SUBSCRIPTION|GET,SUBSCRIPTION|PATCH,CLIENT|REPORTS,CLIENT|CONTROLS"
-      	def issue_public_key(scope:)
+      	def issue_public_key(scope:, user_id)
       		path = '/client?issue_public_key=YES'
-      		path += "&scope=#{scope}"
+
+            path += "&scope=#{scope}"
+
+            path += "&user_id=#{user_id}" if user_id
+
       		response = client.get(path)
       		response[ "public_key_obj"]
       	end
