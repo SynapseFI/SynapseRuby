@@ -11,6 +11,7 @@ module Synapse
 			@page = page
 			@page_count = page_count
 			@limit =limit
+			@user_count = user_count
 			@payload = payload
 		end
 	end
