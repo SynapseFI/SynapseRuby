@@ -4,7 +4,7 @@
 #  gem push pkg/<pkg name>
 module Synapse
   # Gem version
-  VERSION = '1.0.13'.freeze
+  VERSION = '1.0.16'.freeze
 end
 
 

@@ -684,9 +684,16 @@ module Synapse
         # Queries a node for a specific subnet by subnet_id
         # @param node_id [String] id of node
         # @param subnet_id [String,void] (optional) id of a subnet to look up
+        # @param full_dehydrate [String](optional)
         # @return [Synapse::Subnet]
-        def get_subnet(node_id:,subnet_id:)
+        def get_subnet(node_id:,subnet_id:,**options)
             path = node(user_id: self.user_id, node_id: node_id) + "/subnets/#{subnet_id}"
+
+            params = VALID_QUERY_PARAMS.map do |p|
+                options[p] ? "#{p}=#{options[p]}" : nil
+            end.compact
+            path += '?' + params.join('&') if params.any?
+
             begin
                 subnet = client.get(path)
             rescue Synapse::Error::Unauthorized
