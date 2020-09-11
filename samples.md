@@ -206,7 +206,7 @@ institutions = client.get_all_institutions(page: 5, per_page: 5)
 - Returns api response
 
 ```bash
-scope = "USERS|GET,USER|GET,USER|PATCH"
+scope = ["USERS|GET","USER|GET","USER|PATCH"]
 public_key = client.issue_public_key(scope: scope)
 ```
 
@@ -215,7 +215,7 @@ public_key = client.issue_public_key(scope: scope)
 ##### Get New Oauth
 
 ```bash
-scope =["USERS|GET,USER|GET,USER|PATCH"]
+scope =["USERS|GET","USER|GET","USER|PATCH"]
 user.authenticate(scope: scope)
 ```
 
