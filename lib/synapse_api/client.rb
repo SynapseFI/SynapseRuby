@@ -116,7 +116,7 @@ module Synapse
       		Users.new(limit:       response["limit"],
                     page:        response["page"],
                     page_count:  response["page_count"],
-                    user_count:  response["user_count"],
+                    user_count:  response["users_count"],
                     payload:     users,
                     http_client: client
                    )
