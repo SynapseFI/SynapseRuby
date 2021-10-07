@@ -51,7 +51,7 @@ module Synapse
         def create_user(payload:, ip_address:, **options)
             client.update_headers(ip_address: ip_address, fingerprint: options[:fingerprint])
 
-            response = client.post(user_path,payload, options)
+            response = client.post(user_path, payload, **options)
 
             User.new(user_id:           response['_id'],
                    refresh_token:     response['refresh_token'],
@@ -403,6 +403,3 @@ module Synapse
         end
     end
 end
-
-
-
