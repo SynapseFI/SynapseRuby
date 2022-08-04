@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    synapseruby (1.0.11)
+    synapseruby (1.0.17)
       rest-client (~> 2.0)
 
 GEM
@@ -13,11 +13,11 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     dotenv (2.1.2)
     http-accept (1.7.0)
-    http-cookie (1.0.3)
+    http-cookie (1.0.5)
       domain_name (~> 0.5)
-    mime-types (3.3)
+    mime-types (3.4.1)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2019.1009)
+    mime-types-data (3.2022.0105)
     minitest (5.8.5)
     minitest-reporters (1.1.19)
       ansi
@@ -35,7 +35,7 @@ GEM
     rubygems-update (3.0.6)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.6)
+    unf_ext (0.0.8.2)
 
 PLATFORMS
   ruby

@@ -83,7 +83,7 @@ module Synapse
 		# @param **options payload = idempotency_key [String] (optional) avoid accidentally performing the same operation twice
 	    # @return [Hash] API response
         # @raise [Synapse::Error] subclass depends on HTTP response
-        def post(path, payload, **options)
+        def post(path, payload, options={})
             #copy of current headers
             headers = get_headers
 

@@ -118,7 +118,7 @@ module Synapse
 
             path = oauth_path()
 
-			oauth_response = client.post(path, payload,options)
+			oauth_response = client.post(path, payload, **options)
             oauth_key = oauth_response['oauth_key']
             oauth_expires = oauth_response['expires_in']
             self.oauth_key = oauth_key
@@ -215,10 +215,10 @@ module Synapse
 			path = path + nodes_path
 
             begin
-                response = client.post(path,payload, options)
+                response = client.post(path,payload, **options)
             rescue Synapse::Error::Unauthorized
                 self.authenticate()
-                response = client.post(path,payload, options)
+                response = client.post(path,payload, **options)
             end
 
             if response["nodes"]
@@ -382,10 +382,10 @@ module Synapse
         def create_transaction(node_id: ,payload:, **options)
             path = trans_path(user_id: self.user_id, node_id: node_id)
             begin
-                transaction = client.post(path,payload, options)
+                transaction = client.post(path,payload, **options)
             rescue Synapse::Error::Unauthorized
                 self.authenticate()
-                transaction = client.post(path,payload, options)
+                transaction = client.post(path,payload, **options)
             end
             transaction = Transaction.new(trans_id: transaction['_id'],
                                         payload:  transaction,
