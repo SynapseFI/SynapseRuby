@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'synapse_fi'
-
 module Synapse
   # Initializes various wrapper settings such as development mode and request
   # header values
@@ -51,7 +49,7 @@ module Synapse
     def create_user(payload:, ip_address:, **options)
       client.update_headers(ip_address: ip_address, fingerprint: options[:fingerprint])
 
-      response = client.post(user_path, payload, options)
+      response = client.post(user_path, payload, **options)
 
       User.new(user_id: response['_id'],
                refresh_token: response['refresh_token'],
@@ -102,7 +100,7 @@ module Synapse
     # @param per_page [Integer] (optional) response will default to 20
     # @return [Array<Synapse::Users>]
     def get_users(**options)
-      path = user_path(options)
+      path = user_path(**options)
       response = client.get(path)
       return [] if response['users'].empty?
 
@@ -177,7 +175,7 @@ module Synapse
     # @param per_page [Integer] (optional) response will default to 20
     # @return API response [Hash]
     def get_all_institutions(**options)
-      client.get(institutions_path(options))
+      client.get(institutions_path(**options))
     end
 
     # Queries Synapse API to create a webhook subscriptions for platform
@@ -186,7 +184,7 @@ module Synapse
     # @see https://docs.synapsefi.com/docs/create-subscription
     # @return [Synapse::Subscription]
     def create_subscriptions(scope:, **options)
-      response = client.post(subscriptions_path, scope, options)
+      response = client.post(subscriptions_path, scope, **options)
 
       Subscription.new(subscription_id: response['_id'], url: response['url'], payload: response)
     end
@@ -196,7 +194,7 @@ module Synapse
     # @param per_page [Integer] (optional) response will default to 20
     # @return [Array<Synapse::Subscriptions>]
     def get_all_subscriptions(**options)
-      subscriptions = client.get(subscriptions_path(options))
+      subscriptions = client.get(subscriptions_path(**options))
 
       return [] if subscriptions['subscriptions'].empty?
 

@@ -36,7 +36,7 @@ class HTTPClientTest < Minitest::Test
       idemopotency_key: 'new idemopotency_key'
     }
 
-    @client = Synapse::Client.new(@options)
+    @client = Synapse::Client.new(**@options)
 
     @http_request = @client.client
 

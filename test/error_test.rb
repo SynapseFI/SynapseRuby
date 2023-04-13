@@ -12,7 +12,7 @@ class ErrorTest < Minitest::Test
       development_mode: true
     }
     # please make sure to change constant with your own values
-    @user_id = '5bea4453321f48299bac84e8'
+    @user_id = '643818d73fe5ad4cb89e918c'
     @client_id = ENV.fetch('TEST_CLIENT_ID')
     @client_secret = ENV.fetch('TEST_CLIENT_SECRET')
     @fingerprint = '|static_pin'
@@ -119,7 +119,7 @@ class ErrorTest < Minitest::Test
 
   # updating a a docuemnt that doesnt exist for a user
   def test_404_response
-    client = Synapse::Client.new(@options)
+    client = Synapse::Client.new(**@options)
     user_id = @user_id
     client_id = @client_id
     client_secret = @client_secret
@@ -166,7 +166,7 @@ class ErrorTest < Minitest::Test
 
   # Creating a ACH-US node with a routing number that doesn't exist
   def test_409_response
-    client = Synapse::Client.new(@options)
+    client = Synapse::Client.new(**@options)
     user_id = @user_id
     client_id = @client_id
     client_secret = @client_secret

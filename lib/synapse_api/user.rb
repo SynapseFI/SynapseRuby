@@ -82,7 +82,7 @@ module Synapse
       [options[:page], options[:per_page]].each do |arg|
         raise ArgumentError, "#{arg} must be nil or an Integer >= 1" if arg && (!arg.is_a?(Integer) || arg < 1)
       end
-      path = get_user_path(user_id: user_id) + nodes_path(options)
+      path = get_user_path(user_id: user_id) + nodes_path(**options)
 
       begin
         nodes = client.get(path)
@@ -118,7 +118,7 @@ module Synapse
 
       path = oauth_path
 
-      oauth_response = client.post(path, payload, options)
+      oauth_response = client.post(path, payload, **options)
       oauth_key = oauth_response['oauth_key']
       oauth_expires = oauth_response['expires_in']
       self.oauth_key = oauth_key
@@ -209,10 +209,10 @@ module Synapse
       path += nodes_path
 
       begin
-        response = client.post(path, payload, options)
+        response = client.post(path, payload, **options)
       rescue Synapse::Error::Unauthorized
         authenticate
-        response = client.post(path, payload, options)
+        response = client.post(path, payload, **options)
       end
 
       if response['nodes']
@@ -375,10 +375,10 @@ module Synapse
     def create_transaction(node_id:, payload:, **options)
       path = trans_path(user_id: user_id, node_id: node_id)
       begin
-        transaction = client.post(path, payload, options)
+        transaction = client.post(path, payload, **options)
       rescue Synapse::Error::Unauthorized
         authenticate
-        transaction = client.post(path, payload, options)
+        transaction = client.post(path, payload, **options)
       end
       transaction = Transaction.new(trans_id: transaction['_id'],
                                     payload: transaction,
@@ -604,10 +604,10 @@ module Synapse
     def create_subnet(node_id:, payload:, **options)
       path = subnet_path(user_id: user_id, node_id: node_id)
       begin
-        subnet = client.post(path, payload, options)
+        subnet = client.post(path, payload, **options)
       rescue Synapse::Error::Unauthorized
         authenticate
-        subnet = client.post(path, payload, options)
+        subnet = client.post(path, payload, **options)
       end
       Subnet.new(subnet_id: subnet['_id'], payload: subnet, node_id: node_id)
     end

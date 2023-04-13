@@ -170,7 +170,7 @@ module Synapse
     end
 
     def oauthenticate(user_id:)
-      refresh_token = refresh_token(user_id: user_id)
+      refresh_token(user_id: user_id)
     end
 
     private
