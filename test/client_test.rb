@@ -1,18 +1,20 @@
-require "test_helper.rb"
+# frozen_string_literal: true
+
+require 'test_helper'
 
 class ClientTest < Minitest::Test
   def setup
     # make sure to set up a .env file and add your own
     #  client_id and client_secret values
     @options = {
-      client_id:       ENV.fetch('TEST_CLIENT_ID'),
-      client_secret:    ENV.fetch('TEST_CLIENT_SECRET'),
-      ip_address:       '127.0.0.1',
-      fingerprint:      'static_pin',
+      client_id: ENV.fetch('TEST_CLIENT_ID'),
+      client_secret: ENV.fetch('TEST_CLIENT_SECRET'),
+      ip_address: '127.0.0.1',
+      fingerprint: 'static_pin',
       development_mode: true
     }
     # please make sure to change constant with your own values
-    @subscription = "5beb6f2fbddf603229fe4ec5"
+    @subscription = '5beb6f2fbddf603229fe4ec5'
   end
 
   # Testing HTTP_REQUEST @congfig through client class
@@ -33,7 +35,7 @@ class ClientTest < Minitest::Test
     assert_equal client.client.base_url, 'https://api.synapsefi.com/v3.1'
   end
 
-   # Test if client.client is and instance of HTTPClient
+  # Test if client.client is and instance of HTTPClient
   def test_instance_reader_methods
     client = Synapse::Client.new(@options)
     # fails if HTTP::CLient is not an instance of the Client class
@@ -46,18 +48,18 @@ class ClientTest < Minitest::Test
     payload = {
       "logins": [
         {
-          "email": "test234@synapsefi.com"
+          "email": 'test234@synapsefi.com'
         }
       ],
       "phone_numbers": [
-        "921.221.3411",
-        "test234@synapsefi.com"
+        '921.221.3411',
+        'test234@synapsefi.com'
       ],
       "legal_names": [
-        "Andrew J"
+        'Andrew J'
       ]
     }
-    @response = client.create_user(payload: payload, ip_address: "127.0.0.1")
+    @response = client.create_user(payload: payload, ip_address: '127.0.0.1')
     assert_instance_of Synapse::User, @response
   end
 
@@ -69,7 +71,7 @@ class ClientTest < Minitest::Test
 
   def test_get_transaction
     client = Synapse::Client.new(@options)
-    response = client.get_all_transaction()
+    response = client.get_all_transaction
     assert_instance_of Synapse::Transactions, response
   end
 
@@ -84,14 +86,14 @@ class ClientTest < Minitest::Test
     client = Synapse::Client.new(@options)
     body = {
       "scope": [
-        "USERS|POST",
-        "USER|PATCH",
-        "NODES|POST",
-        "NODE|PATCH",
-        "TRANS|POST",
-        "TRAN|PATCH"
+        'USERS|POST',
+        'USER|PATCH',
+        'NODES|POST',
+        'NODE|PATCH',
+        'TRANS|POST',
+        'TRAN|PATCH'
       ],
-      "url": "https://requestb.in/zp216zzp"
+      "url": 'https://requestb.in/zp216zzp'
     }
     response = client.create_subscriptions(scope: body)
     assert_instance_of Synapse::Subscription, response
@@ -100,7 +102,7 @@ class ClientTest < Minitest::Test
 
   def test_get_all_subscriptions
     client = Synapse::Client.new(@options)
-    response = client.get_all_subscriptions()
+    response = client.get_all_subscriptions
     assert_instance_of Synapse::Subscriptions, response
     sleep(5)
   end
@@ -115,7 +117,7 @@ class ClientTest < Minitest::Test
 
   def test_get_all_institutions
     client = Synapse::Client.new(@options)
-    response = client.get_all_institutions()
+    response = client.get_all_institutions
     assert_instance_of Hash, response
   end
 
@@ -124,28 +126,28 @@ class ClientTest < Minitest::Test
     payload = {
       "logins": [
         {
-          "email": "test@synapsefi.com"
+          "email": 'test@synapsefi.com'
         }
       ],
       "phone_numbers": [
-        "901.111.1111",
-        "test@synapsefi.com"
+        '901.111.1111',
+        'test@synapsefi.com'
       ],
       "legal_names": [
-        "Andrew Martin"
+        'Andrew Martin'
       ],
       "extra": {
-        "supp_id": "122eddfgbeafrfvbbb",
-        "cip_tag":1,
+        "supp_id": '122eddfgbeafrfvbbb',
+        "cip_tag": 1,
         "is_business": false
       }
     }
     # fails if the block outputs anything to stderr stdout
-    assert_silent { client.create_user(payload: payload, ip_address: "127.0.0.1") }
+    assert_silent { client.create_user(payload: payload, ip_address: '127.0.0.1') }
 
     @options[:logging] = true
     # failse if stdout does not output the expected results
-    assert_output { client.create_user(payload: payload, ip_address: "127.0.0.1") }
+    assert_output { client.create_user(payload: payload, ip_address: '127.0.0.1') }
   end
 
   def test_issue_public_key
@@ -154,6 +156,4 @@ class ClientTest < Minitest::Test
     assert_equal ['CLIENT|CONTROLS'], response['scope']
     refute_nil response['public_key']
   end
-
 end
-

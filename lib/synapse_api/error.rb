@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Synapse
   # Custom class for handling HTTP and API errors.
   class Error < StandardError
@@ -47,7 +49,7 @@ module Synapse
       '409' => Synapse::Error::Conflict,
       '429' => Synapse::Error::TooManyRequests,
       '500' => Synapse::Error::InternalServerError,
-      '503' => Synapse::Error::ServiceUnavailable,
+      '503' => Synapse::Error::ServiceUnavailable
     }.freeze
 
     # The SynapsePay API Error Code
@@ -75,18 +77,17 @@ module Synapse
       private
 
       def parse_error(body)
-
         if body.nil? || body.empty?
           ['', nil, nil]
 
         elsif body['mfa'] && body.is_a?(Hash)
-          ["#{body['mfa']["message"] } acces_token: #{body['mfa']["access_token"]}", body['error_code'], body['http_code']]
+          ["#{body['mfa']['message']} acces_token: #{body['mfa']['access_token']}", body['error_code'], body['http_code']]
         elsif body[:mfa] && body.is_a?(Hash)
-          ["#{body[:mfa][:message] } acces_token: #{body[:mfa][:access_token]}", body[:error_code], body[:http_code]]
+          ["#{body[:mfa][:message]} acces_token: #{body[:mfa][:access_token]}", body[:error_code], body[:http_code]]
 
         elsif body['message'] && body.is_a?(Hash)
-          [body["message"]["en"], body['error_code'], body['http_code']]
-         elsif body[:message] && body.is_a?(Hash)
+          [body['message']['en'], body['error_code'], body['http_code']]
+        elsif body[:message] && body.is_a?(Hash)
           [body[:message][:en], body[:error_code], body[:http_code]]
 
         elsif body.is_a?(Hash) && body['error'].is_a?(Hash)
@@ -103,7 +104,7 @@ module Synapse
     # @param code [Integer]
     # @param response [Hash]
     # @return [Synapse::Error]
-    def initialize(message: '', code: nil, response: {}, http_code:)
+    def initialize(http_code:, message: '', code: nil, response: {})
       super(message)
       @code     = code
       @response = response
